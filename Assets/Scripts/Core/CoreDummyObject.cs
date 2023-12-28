@@ -6,8 +6,13 @@ namespace core.modules
 {
     public class CoreDummyObject : MonoBehaviour
     {
-    }
+        public delegate void ModuleUnityCallDelegate();
+        public ModuleUnityCallDelegate unity_GUIDelegate;
 
-    //Calls for GUI
-    //Calls for Updating?
+        private void OnGUI()
+        {
+            if(!ReferenceEquals(unity_GUIDelegate, null))
+                unity_GUIDelegate();
+        }
+    }
 }

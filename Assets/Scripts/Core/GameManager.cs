@@ -7,6 +7,9 @@ using core.modules;
 
 public class GameManager
 {
+    // TODO:
+    // TAKE ALL MODULE HANDLING LOGIC AND PUT IT INTO A SEPERATE MANAGER
+
     //Never use this variable directly
     private static GameManager _instance = null;
     
@@ -27,7 +30,9 @@ public class GameManager
         foreach(BaseModule _module in InstantiateTypesInSameNamespaceAs<BaseModule>(coreDummyObject))
         {
             activeModules.Add(_module);
-            //Register unity calls to delegates?
+
+            //Register unity calls to delegates
+            coreDummyObject.unity_GUIDelegate += _module.OnGUI;
         }
     }
 
@@ -44,7 +49,7 @@ public class GameManager
 
     public void Hellow()
     {
-        //Testing call
+        //Testing call -- delete this
     }
 
     // Works but needs handling of this better or reworked to not use a list

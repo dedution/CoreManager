@@ -6,31 +6,40 @@ namespace core.modules
     public class DebugManager : BaseModule
     {
         public bool fullscreenBool = false;
+        private Vector2 scrollPosition;
 
-        public DebugManager() : base()
+        protected override void onInitialize()
         {
+            Debug.Log("Initialized Debug Manager");
         }
 
         private void DrawMenuTest()
         {
-            GUILayout.BeginArea(new Rect(350, 90, 400, 300), "", "box");
+            GUILayout.BeginArea(new Rect(0, 0, 400, 600), "", "box");
+            scrollPosition = GUILayout.BeginScrollView(
+            scrollPosition, GUILayout.Width(400), GUILayout.Height(500));
             GUILayout.Box("Settings:");
             GUILayout.Space(5);
             GUILayout.Box("Sound:");
             GUILayout.Label("Volume:");
             GUILayout.BeginHorizontal();
+            
             AudioListener.volume = GUILayout.HorizontalSlider(AudioListener.volume, 0.0f, 1.0f);
             GUILayout.Label("" + AudioListener.volume.ToString("0.0"), "labelSound", GUILayout.MaxWidth(100));
             GUILayout.EndHorizontal();
-            GUILayout.Space(10);
-            GUILayout.Box("Grahpics:");
             GUILayout.Space(500); // test scroll
             fullscreenBool = GUILayout.Toggle(fullscreenBool, "FullScreen?");
             GUILayout.EndScrollView();
+            
+            GUILayout.Space(25);
+            GUILayout.Label("______________________________________________");
+            GUILayout.Label("BUILD ID: XXXXXXX");
+            GUILayout.Label("BUILD DATE: 01-01-0101");
+
             GUILayout.EndArea();
         }
 
-        public void OnGUI()
+        public override void OnGUI()
         {
             DrawMenuTest();
         }
