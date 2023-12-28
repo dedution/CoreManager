@@ -7,8 +7,7 @@ public class TesterScript : MonoBehaviour
 {
     void Start()
     {
-        GameManager.Instance.Hellow();
-        GameManager.Instance.GetLoadedModule<DebugManager>().Hellow();
+        GameManager.GetLoadedModule<DebugManager>().Hellow();
         Debug.Log("Test run!");
     }
 }

@@ -7,7 +7,10 @@ using core.modules;
 
 public class GameManager
 {
+    //Never use this variable directly
     private static GameManager _instance = null;
+    
+    //Persistent behavior that handles unity calls 
     private CoreDummyObject coreDummyObject;
 
     private List<BaseModule> activeModules = new List<BaseModule>();
@@ -21,7 +24,7 @@ public class GameManager
         UnityEngine.Object.DontDestroyOnLoad(coreDummyObject.gameObject);
 
         //Initialize modules - uses dummy object namespace to find other classes in the same namepsace and inits them
-        foreach(BaseModule _module in NamespaceHelper.InstantiateTypesInSameNamespaceAs<BaseModule>(coreDummyObject))
+        foreach(BaseModule _module in InstantiateTypesInSameNamespaceAs<BaseModule>(coreDummyObject))
         {
             activeModules.Add(_module);
             //Register unity calls to delegates?
@@ -45,19 +48,13 @@ public class GameManager
     }
 
     // Works but needs handling of this better or reworked to not use a list
-    public T GetLoadedModule<T>()
+    public static T GetLoadedModule<T>()
     {
-        var _obj = activeModules.OfType<T>().ToList();
+        var _obj = Instance.activeModules.OfType<T>().ToList();
         return (T)_obj[0]; //Returns the first module found -- needs better handling in case of lack of modules
     }
-}
 
-/// <summary>
-///  Helper class with template functions to fetch and create objects of classes of a specific namespace and subclass of a base class
-/// </summary>
-static class NamespaceHelper 
-{
-    public static List<Type> FindTypesInSameNamespaceAs(object instance)
+    private List<Type> FindTypesInSameNamespaceAs(object instance)
     {
         string ns = instance.GetType().Namespace;
         Type instanceType = instance.GetType();
@@ -66,7 +63,7 @@ static class NamespaceHelper
         return results;
     }
 
-    public static List<T> InstantiateTypesInSameNamespaceAs<T>(object instance)
+    private List<T> InstantiateTypesInSameNamespaceAs<T>(object instance)
     {
         List<T> instances = new List<T>();
 
