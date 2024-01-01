@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace core.modules
+namespace core
 {
     public class CoreDummyObject : MonoBehaviour
     {
