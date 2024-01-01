@@ -1,0 +1,11 @@
+{
+  "name": "com.dedution.coremanager",
+  "displayName": "CoreManager",
+  "description": "CoreManager - Core Systems",
+  "unity": "2022.3",
+  "version": "1.0.0",
+  "author": {
+    "name": "Fabio Barbosa",
+    "url": "https://github.com/deduti0n/CoreManager"
+  }
+}
