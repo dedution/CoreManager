@@ -10,7 +10,7 @@ namespace core.modules
 
         protected override void onInitialize()
         {
-            Debug.Log("Initialized Debug Manager");
+            
         }
 
         private void DrawMenuTest()
@@ -41,7 +41,7 @@ namespace core.modules
 
         public override void OnGUI()
         {
-            DrawMenuTest();
+            //DrawMenuTest();
         }
 
         public void Hellow()

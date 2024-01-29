@@ -31,8 +31,6 @@ namespace core.modules
 
         protected override void onInitialize()
         {
-            Debug.Log("Initialized Event Manager");
-
             if (eventDictionary == null)
                 eventDictionary = new Dictionary<string, Action<Dictionary<string, object>>>();
             
