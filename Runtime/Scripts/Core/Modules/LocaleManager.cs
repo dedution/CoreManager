@@ -42,7 +42,7 @@ namespace core.modules
 
         private bool LocalIsLoaded { get; set;} = false;
 
-        protected override void onInitialize()
+        public override void onInitialize()
         {
         }
 

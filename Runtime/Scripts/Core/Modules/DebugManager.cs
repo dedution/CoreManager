@@ -8,7 +8,7 @@ namespace core.modules
         public bool fullscreenBool = false;
         private Vector2 scrollPosition;
 
-        protected override void onInitialize()
+        public override void onInitialize()
         {
             
         }

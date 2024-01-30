@@ -9,6 +9,10 @@ namespace core
 {
     public class ModuleController
     {
+        /** Module loader and controller
+        * Some of these modules have direct instance access via semi-singleton implementation to facilitate frequent calls
+        */
+
         private List<BaseModule> activeModules = new List<BaseModule>();
 
         public ModuleController()
@@ -17,9 +21,7 @@ namespace core
 
         public void Init(CoreDummyObject coreDummyObject)
         {
-            Debug.Log("# Module Controller initialized.");
-
-            //Initialize modules - uses dummy object namespace to find other classes in the same namepsace and inits them
+            // Initialize modules - uses dummy object namespace to find other classes in the same namepsace and inits them
             foreach (BaseModule _module in InstantiateModules<BaseModule>(coreDummyObject))
             {
                 activeModules.Add(_module);
@@ -31,8 +33,10 @@ namespace core
                 _module.MonoObject = coreDummyObject;
             }
 
-            Debug.Log("# Modules Loaded! (" + activeModules.Count + ")");
+            // Initialize modules -- prevents load order problems.
+            activeModules.ForEach(delegate(BaseModule _module) {_module.onInitialize();});
 
+            Debug.Log("# Modules Loaded! (" + activeModules.Count + ")");
         }
         public T FindModule<T>()
         {

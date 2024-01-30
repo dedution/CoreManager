@@ -10,7 +10,7 @@ namespace core.modules
         private Dictionary<string, object> m_LocalSaveData = new Dictionary<string, object>();
         private Dictionary<string, string> m_LocalConfigData = new Dictionary<string, string>();
 
-        protected override void onInitialize()
+        public override void onInitialize()
         {
             // Load config data immediately
             SaveSystem_LoadConfigData();

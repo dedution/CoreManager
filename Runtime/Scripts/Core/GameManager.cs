@@ -33,13 +33,13 @@ namespace core
             }
         }
 
+        // Initialize
         public void Init()
         {
-            //Initialize
             moduleController.Init(coreDummyObject);
         }
 
-        // Works but needs handling of this better or reworked to not use a list
+        // Easier access to module controller
         public static T GetLoadedModule<T>()
         {
             var _obj = Instance.moduleController.FindModule<T>();

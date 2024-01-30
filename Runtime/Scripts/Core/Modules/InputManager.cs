@@ -7,7 +7,7 @@ namespace core.modules
 {
     public class InputManager : BaseModule
     {
-        protected override void onInitialize()
+        public override void onInitialize()
         {
         }
 

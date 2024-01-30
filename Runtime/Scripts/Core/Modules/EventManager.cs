@@ -29,13 +29,17 @@ namespace core.modules
 
         private static EventManager _instance = null;
 
-        protected override void onInitialize()
-        {
-            if (eventDictionary == null)
-                eventDictionary = new Dictionary<string, Action<Dictionary<string, object>>>();
-            
+        public EventManager() {
             if(_instance == null)
                 _instance = this;
+            
+            if (eventDictionary == null)
+                eventDictionary = new Dictionary<string, Action<Dictionary<string, object>>>();
+        }
+
+        public override void onInitialize()
+        {
+            
         }
 
         public static void StartListening(string eventName, Action<Dictionary<string, object>> listener)

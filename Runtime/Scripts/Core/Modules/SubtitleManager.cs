@@ -15,10 +15,8 @@ namespace core.modules
 
         private bool Subtitle_Enabled = false;
 
-        protected override void onInitialize()
+        public override void onInitialize()
         {
-            currentSubtitleTimer = 0f;
-
             // Update SETTINGS_ALLOWSUBTITLES through an event with the correct state
             Subtitle_Enabled = GameManager.GetLoadedModule<SaveSystemManager>().SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false);
             EventManager.StartListening("SubtitleManager", OnSaveSystem);
@@ -31,24 +29,21 @@ namespace core.modules
 
         public override void UpdateModule()
         {
-            if (currentSubtitleTimer < 0)
-                currentSubtitleTimer = 0;
-            else
-                currentSubtitleTimer -= Time.deltaTime;
+            currentSubtitleTimer = currentSubtitleTimer < 0 ? 0 : currentSubtitleTimer - Time.deltaTime;
 
-            if (currentSubtitleTimer == 0 && SubtitleQueue.Count > 0)
-            {
-                string key = SubtitleQueue.Keys.ElementAt(0);
+            if(currentSubtitleTimer > 0 || SubtitleQueue.Count == 0 || InformSubtitle == null)
+                return;
 
-                InformSubtitle(key, SubtitleQueue[key]);
-                currentSubtitleTimer = SubtitleQueue[key];
-                SubtitleQueue.Remove(key);
-            }
+            string _subtitle = SubtitleQueue.Keys.ElementAt(0);
+            InformSubtitle(_subtitle, SubtitleQueue[_subtitle]);
+            currentSubtitleTimer = SubtitleQueue[_subtitle];
+
+            SubtitleQueue.Remove(_subtitle);
         }
 
         public void Subtitles_Say_Immediate(string subtitle, float time)
         {
-            if(!Subtitle_Enabled) return;
+            if(!Subtitle_Enabled || InformSubtitle == null) return;
 
             InformSubtitle(subtitle, time);
             currentSubtitleTimer = time;
@@ -61,7 +56,7 @@ namespace core.modules
 
         public void Subtitles_ClearDisplayers()
         {
-            if(!Subtitle_Enabled) return;
+            if(!Subtitle_Enabled || InformSubtitle == null) return;
             
             // Inform a cleanup of current subtitle
             InformSubtitle("", 0.1f);

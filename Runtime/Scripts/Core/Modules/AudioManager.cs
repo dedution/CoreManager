@@ -9,10 +9,13 @@ namespace core.modules
     {
         private static AudioManager _instance = null;
 
-        protected override void onInitialize()
-        {
+        public AudioManager() {
             if(_instance == null)
                 _instance = this;
+        }
+        
+        public override void onInitialize()
+        {
         }
 
         // TODO:
