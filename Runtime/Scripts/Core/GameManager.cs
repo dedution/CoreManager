@@ -14,6 +14,7 @@ namespace core
         //Persistent behavior that handles unity calls 
         private CoreDummyObject coreDummyObject;
         private ModuleController moduleController = new ModuleController();
+        private bool m_gameManagerWasInit = false;
 
         private GameManager()
         {
@@ -36,7 +37,11 @@ namespace core
         // Initialize
         public void Init()
         {
-            moduleController.Init(coreDummyObject);
+            if (!m_gameManagerWasInit)
+            {
+                moduleController.Init(coreDummyObject);
+                m_gameManagerWasInit = true;
+            }
         }
 
         // Easier access to module controller

@@ -2,69 +2,62 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using core.modules;
+using static core.modules.SaveSystemManager;
+using System;
 
 namespace core.gameplay
 {
-    public abstract class baseGameActor : MonoBehaviour, ISaver
+    public class baseGameActor : MonoBehaviour
     {
         // Variables
-        public object SaveData { get; set; }
-        public bool SaveSystem_Enabled { get; set; }
-        public string SaveSystem_GUID  { get; set; }
+        [Header("Actor Params")]
+        public ActorTypes actorType = ActorTypes.System;
 
-        void Start() 
+        [Header("Save System")]
+        public SaveData saveData = new SaveData();
+
+        void Start()
         {
+            // Try to init modules just in case
+            GameManager.Instance.Init();
+
             // Register Actor
             GameManager.GetLoadedModule<ActorManager>().RegisterActor(this);
 
-            // Load saved data
+            // Load saved data -- maybe call this through an event for save system updates?
             SaveSystem_Load();
+
+            // Initialize
+            onStart();
         }
 
-        public virtual void SaveSystem_Load()
+        protected virtual void onStart()
         {
-            if(!SaveSystem_Enabled)
-                return;
-
-            SaveData = GameManager.GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Get(this);
         }
 
-        public virtual void SaveSystem_Save()
+        protected virtual void SaveSystem_Load()
         {
-            if(!SaveSystem_Enabled)
-                return;
-
-            GameManager.GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Set(this);
+            GameManager.GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Get(saveData);
         }
 
-        void OnEnable()
+        protected virtual void SaveSystem_Save()
         {
-            GenerateGUID();
+            GameManager.GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Set(saveData);
         }
 
-        void OnValidate()
-        {
-            GenerateGUID();
-        }
-
-        private void GenerateGUID()
-        {
-            if (string.IsNullOrWhiteSpace(SaveSystem_GUID)) {
-                SaveSystem_GUID = System.Guid.NewGuid().ToString();
-            }
-        }
-
-        public string GetGUID()
-        {
-            return SaveSystem_GUID;
-        }
-
-        void Destroy()
+        private void Destroy()
         {
             SaveSystem_Save();
 
             // Unregister Actor
             GameManager.GetLoadedModule<ActorManager>().UnregisterActor(this);
+
+            onDestroy();
+        }
+
+        protected virtual void onDestroy()
+        { 
+            
         }
     }
 }

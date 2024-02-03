@@ -9,6 +9,10 @@ namespace core.modules
     {
         private static AudioManager _instance = null;
 
+        // TODO:
+        // Loading audio for UI
+        // Pool-based play audio at 3D point (that doesnt bug out with timescale at 0)
+
         public AudioManager() {
             if(_instance == null)
                 _instance = this;
@@ -17,10 +21,5 @@ namespace core.modules
         public override void onInitialize()
         {
         }
-
-        // TODO:
-        // Loading audio for UI
-        // Pool-based play audio at 3D point (that doesnt bug out with timescale at 0)
-        // 
     }
 }

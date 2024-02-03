@@ -7,6 +7,22 @@ namespace core.modules
 {
     public class SaveSystemManager : BaseModule
     {
+        [System.Serializable]
+        public struct SaveData
+        {
+            public bool Enabled;
+            public string GUID;
+            public object Data;
+
+            public void GenerateGUID()
+            {
+                if (string.IsNullOrWhiteSpace(GUID))
+                {
+                    GUID = System.Guid.NewGuid().ToString();
+                }
+            }
+        }
+
         private Dictionary<string, object> m_LocalSaveData = new Dictionary<string, object>();
         private Dictionary<string, string> m_LocalConfigData = new Dictionary<string, string>();
 
@@ -89,19 +105,25 @@ namespace core.modules
             SaveSystem_SaveConfigData();
         }
 
-        public void SaveSystem_Game_Set(ISaver _actor)
+        public void SaveSystem_Game_Set(SaveData _actor)
         {
-            m_LocalSaveData.Add(_actor.SaveSystem_GUID, _actor.SaveData);
+            if(!_actor.Enabled)
+                return;
+                
+            m_LocalSaveData.Add(_actor.GUID, _actor.Data);
         }
 
-        public object SaveSystem_Game_Get(ISaver _actor)
+        public void SaveSystem_Game_Get(SaveData _actor)
         {
+            if(!_actor.Enabled)
+                return;
+
             object _data = null; 
 
-            if(m_LocalSaveData.ContainsKey(_actor.SaveSystem_GUID))
-                m_LocalSaveData.TryGetValue(_actor.SaveSystem_GUID, out _data);
+            if(m_LocalSaveData.ContainsKey(_actor.GUID))
+                m_LocalSaveData.TryGetValue(_actor.GUID, out _data);
 
-            return _data;
+            _actor.Data = _data;
         }
 
         public void SaveSystem_Game_Save()
