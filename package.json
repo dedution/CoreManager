@@ -1,7 +1,7 @@
 {
   "name": "com.dedution.coremanager",
   "displayName": "CoreManager",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "unity": "2019.3",
   "description": "Core Systems for debugging and game handling",
   "keywords": [
@@ -14,5 +14,8 @@
   "repository": {
     "url": "https://github.com/deduti0n/CoreManager.git",
     "type": "git"
+  },
+  "dependencies": {
+    "com.unity.addressables": "1.21.19"
   }
 }
