@@ -47,6 +47,26 @@ namespace core.gameplay
                 return scl.z;
         }
 
+        private Vector3 GetLocalDir()
+        {
+            if (axis == Axis.X)
+                return Vector3.right;
+            else if (axis == Axis.Y)
+                return Vector3.up;
+            else
+                return Vector3.forward;
+        }
+
+        private Vector3 GetLocalUp()
+        {
+            if (axis == Axis.X)
+                return Vector3.up;
+            else if (axis == Axis.Y)
+                return Vector3.forward;
+            else
+                return Vector3.up;
+        }
+
         private void ToWorldSpaceCapsule(out float3 start, out float3 end, out float r)
         {
             float3 center = transform.TransformPoint(Center);
@@ -87,56 +107,67 @@ namespace core.gameplay
             _other.ToWorldSpaceCapsule(out float3 otherStart, out float3 otherEnd, out float otherRadius);
             SegmentSegmentCPA(myStart, myEnd, otherStart, otherEnd, out float3 C0, out float3 C1, out bool parallel);
 
-            float distance = math.length( C1 - C0 );
-            return distance <= myRadius+otherRadius;
+            float distance = math.length(C1 - C0);
+            return distance <= myRadius + otherRadius;
         }
 
         public bool CheckCollision(Vector3 _point, float customRadius = 0.01f)
         {
             ToWorldSpaceCapsule(out float3 myStart, out float3 myEnd, out float myRadius);
             SegmentSegmentCPA(myStart, myEnd, _point, _point, out float3 C0, out float3 C1, out bool parallel);
-            
-            float distance = math.length( C1 - C0 );
+
+            float distance = math.length(C1 - C0);
             return distance <= myRadius + customRadius;
         }
 
         private void OnDrawGizmos()
         {
-            #if UNITY_EDITOR
-            // Draw gizmos only on Editor (uses an editor only class)
+#if UNITY_EDITOR
             float3 center = transform.TransformPoint(Center);
-            DrawWireCapsule(center, transform.rotation, radius, length);
-            #endif
+
+            DrawWireCapsule(
+                transform.TransformPoint(Center),
+                transform.rotation,
+                Vector3.one * GetScale(),
+                GetLocalDir(),
+                GetLocalUp(),
+                length,
+                radius
+                );
+#endif
         }
 
-        #if UNITY_EDITOR
-        private void DrawWireCapsule(Vector3 _pos, Quaternion _rot, float _radius, float _height, Color _color = default(Color))
+#if UNITY_EDITOR
+        public static void DrawWireCapsule(
+            Vector3 pos, Quaternion rot, Vector3 scl,
+            Vector3 ldir, Vector3 lup,
+            float length, float radius,
+            bool resetMatrix = true
+            )
         {
-            if (_color != default(Color))
-                Handles.color = _color;
+            Gizmos.matrix = Matrix4x4.TRS(pos, rot, scl);
+            var l = ldir * ((length - (radius * 2)) / 2);
 
-            Matrix4x4 angleMatrix = Matrix4x4.TRS(_pos, _rot, Handles.matrix.lossyScale);
-            using (new Handles.DrawingScope(angleMatrix))
+            Gizmos.DrawWireSphere(-l, radius);
+            Gizmos.DrawWireSphere(l, radius);
+
+            for (int i = 0; i < 360; i += 45)
             {
-                var pointOffset = (_height - (_radius * 2)) / 2;
-    
-                //draw sideways
-                Handles.DrawWireArc(Vector3.up * pointOffset, Vector3.left, Vector3.back, -180, _radius);
-                Handles.DrawLine(new Vector3(0, pointOffset, -_radius), new Vector3(0, -pointOffset, -_radius));
-                Handles.DrawLine(new Vector3(0, pointOffset, _radius), new Vector3(0, -pointOffset, _radius));
-                Handles.DrawWireArc(Vector3.down * pointOffset, Vector3.left, Vector3.back, 180, _radius);
-                //draw frontways
-                Handles.DrawWireArc(Vector3.up * pointOffset, Vector3.back, Vector3.left, 180, _radius);
-                Handles.DrawLine(new Vector3(-_radius, pointOffset, 0), new Vector3(-_radius, -pointOffset, 0));
-                Handles.DrawLine(new Vector3(_radius, pointOffset, 0), new Vector3(_radius, -pointOffset, 0));
-                Handles.DrawWireArc(Vector3.down * pointOffset, Vector3.back, Vector3.left, -180, _radius);
-                //draw center
-                Handles.DrawWireDisc(Vector3.up * pointOffset, Vector3.up, _radius);
-                Handles.DrawWireDisc(Vector3.down * pointOffset, Vector3.up, _radius);
-
+                var q = Quaternion.AngleAxis(i, ldir);
+                var up1 = q * (lup * radius);
+                var up2 = q * (lup * radius);
+                Gizmos.DrawLine(-l + up1, l + up2);
             }
+
+            Gizmos.matrix = Matrix4x4.TRS(pos, rot * Quaternion.AngleAxis(45, ldir), scl);
+            Gizmos.DrawWireSphere(-l, radius);
+            Gizmos.DrawWireSphere(l, radius);
+
+            if (resetMatrix)
+                Gizmos.matrix = Matrix4x4.identity;
         }
-        #endif
+
+#endif
         private void SegmentSegmentCPA
         (
             float3 startA, float3 endA, float3 startB, float3 endB,
