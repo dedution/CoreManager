@@ -44,6 +44,11 @@ namespace core
             }
         }
 
+        public static Coroutine RunCoroutine(IEnumerator _task)
+        {
+            return Instance.coreDummyObject.StartCoroutine(_task);
+        }
+
         // Easier access to module controller
         public static T GetLoadedModule<T>()
         {

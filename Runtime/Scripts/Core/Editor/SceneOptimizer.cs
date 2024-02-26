@@ -60,27 +60,27 @@ class SceneEvents
 
     static void SceneClosing(UnityEngine.SceneManagement.Scene scene, bool removingScene)
     {
-        Debug.Log("SceneClosing");
+        //Debug.Log("SceneClosing");
     }
 
     static void SceneClosed(UnityEngine.SceneManagement.Scene scene)
     {
-        Debug.Log("SceneClosed");
+        //Debug.Log("SceneClosed");
     }
 
     static void SceneOpening(string path, OpenSceneMode mode)
     {
-        Debug.Log("SceneOpening");
+        //Debug.Log("SceneOpening");
     }
 
     static void SceneOpened(UnityEngine.SceneManagement.Scene scene, OpenSceneMode mode)
     {
-        Debug.Log("SceneOpened");
+        //Debug.Log("SceneOpened");
     }
 
     static void NewSceneCreated(UnityEngine.SceneManagement.Scene scene, NewSceneSetup setup, NewSceneMode mode)
     {
-        Debug.Log("NewSceneCreated");
+        //Debug.Log("NewSceneCreated");
     }
 }
 
