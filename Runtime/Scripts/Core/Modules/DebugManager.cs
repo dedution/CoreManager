@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using System;
+using System.Reflection;
 
 namespace core.modules
 {
@@ -42,6 +44,13 @@ namespace core.modules
         public override void onInitialize()
         {
             currentMatrix = GUI.matrix;
+            LoadDebugMenuStyle();
+        }
+
+        private void LoadDebugMenuStyle()
+        {
+            // Loads the style json and parse it to draw the debug menu
+
         }
 
         private void DrawDebugMenu()
@@ -87,6 +96,20 @@ namespace core.modules
         public override void OnGUI()
         {
             DrawDebugMenu();
+        }
+
+        private void ExecuteExternalCallBack(string _command)
+        {
+            // Use: (ex.) GameManager.LogicINeed
+            // Class name needs to be part of modules namespace (maybe isolate it into a separate namespace, used by the debug manager only)
+            // Method to call needs to be static (separate these functions into a utils class)
+            // Update this logic to include custom parameters if necessary
+            
+            var cmd = _command.Split('.');
+
+            Type type = Type.GetType(cmd[0]);
+            MethodInfo method = type.GetMethod(cmd[1]);
+            method.Invoke(null, null);
         }
     }
 }

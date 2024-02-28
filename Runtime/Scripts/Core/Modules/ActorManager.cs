@@ -20,9 +20,13 @@ namespace core.modules
     public class ActorManager : BaseModule
     {
         private List<baseGameActor> m_registeredActors = new List<baseGameActor>();
+        private delegate void ActorUpdater();
+        private ActorUpdater UpdateActors;
 
         // TODO
         // Pooling and handling of game objects
+        // Needs to be created a Pool class to be reused across other modules and game logic
+
         public override void onInitialize()
         {
 
@@ -31,19 +35,35 @@ namespace core.modules
         public void RegisterActor(baseGameActor _actor)
         {
             if (!ReferenceEquals(_actor, null))
+            {
                 m_registeredActors.Add(_actor);
+                
+                if(_actor.actorUpdatesViaManager)
+                    UpdateActors += _actor.onUpdate;
+            }
         }
 
         public void UnregisterActor(baseGameActor _actor)
         {
             if (!ReferenceEquals(_actor, null))
+            {
                 m_registeredActors.Remove(_actor);
+
+                if(_actor.actorUpdatesViaManager)
+                    UpdateActors -= _actor.onUpdate;
+            }
         }
 
         public baseGameActor[] GetActorsByType(ActorTypes _aType)
         {
             var _actors = m_registeredActors.Where(_actor => _actor.actorType == _aType).ToArray();
             return _actors;
+        }
+
+        public override void UpdateModule()
+        {
+            if (!ReferenceEquals(UpdateActors, null))
+                UpdateActors();
         }
     }
 }

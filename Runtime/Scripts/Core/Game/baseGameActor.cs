@@ -12,6 +12,7 @@ namespace core.gameplay
         // Variables
         [Header("Actor Params")]
         public ActorTypes actorType = ActorTypes.System;
+        public bool actorUpdatesViaManager = false;
 
         [Header("Save System")]
         public SaveData saveData = new SaveData();
@@ -33,6 +34,12 @@ namespace core.gameplay
 
         protected virtual void onStart()
         {
+        }
+
+        public virtual void onUpdate()
+        {
+            // Called via Actor Manager Module
+            // Use with caution
         }
 
         protected virtual void SaveSystem_Load()
