@@ -2,9 +2,20 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.Reflection;
+using core.utils;
 
 namespace core.modules
 {
+    public class MenuLayout
+    {
+        public MenuArea[] menuAreas;
+    }
+
+    public class MenuArea
+    {
+
+    }
+
     public class DebugManager : BaseModule
     {
         // TODO
@@ -59,8 +70,7 @@ namespace core.modules
                 return;
             
             /* GUILayout.BeginArea(new Rect(0, 0, 400, 600), "", "box");
-            scrollPosition = GUILayout.BeginScrollView(
-            scrollPosition, GUILayout.Width(400), GUILayout.Height(500));
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(400), GUILayout.Height(500));
             GUILayout.Box("Settings:");
             GUILayout.Space(5);
             GUILayout.Box("Sound:");
@@ -100,7 +110,7 @@ namespace core.modules
 
         private void ExecuteExternalCallBack(string _command)
         {
-            // Use: (ex.) GameManager.LogicINeed
+            // Use: (ex.) GameUtils.TestFunction
             // Class name needs to be part of modules namespace (maybe isolate it into a separate namespace, used by the debug manager only)
             // Method to call needs to be static (separate these functions into a utils class)
             // Update this logic to include custom parameters if necessary
