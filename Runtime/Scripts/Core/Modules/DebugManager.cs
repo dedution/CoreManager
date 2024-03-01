@@ -3,17 +3,39 @@ using System.Collections;
 using System;
 using System.Reflection;
 using core.utils;
+using System.Collections.Generic;
 
 namespace core.modules
 {
     public class MenuLayout
     {
-        public MenuArea[] menuAreas;
+        public List<MenuArea> menuAreas = new List<MenuArea>();
     }
 
     public class MenuArea
     {
+        public string areaName = "";
+        public Rect areaRect;
+        public List<MenuProperty> areaProperties = new List<MenuProperty>();
+    }
 
+    public enum LayoutMenuProperties
+    {
+        Label,
+        Box,
+        Space,
+    }
+
+    public class MenuProperty
+    {
+        public MenuProperty(LayoutMenuProperties menuProperty, string _value)
+        {
+            this.menuProperty = menuProperty;
+            this._value = _value;
+        }
+
+        public LayoutMenuProperties menuProperty = LayoutMenuProperties.Label;
+        public string _value;
     }
 
     public class DebugManager : BaseModule
@@ -29,6 +51,8 @@ namespace core.modules
         private Vector2 scrollPosition; */
         private Matrix4x4 currentMatrix;
         private bool m_isActive = false;
+
+        private MenuLayout menuLayout;
 
         public bool isActive
         {
@@ -56,18 +80,56 @@ namespace core.modules
         {
             currentMatrix = GUI.matrix;
             LoadDebugMenuStyle();
+            //isActive = true;
         }
 
         private void LoadDebugMenuStyle()
         {
             // Loads the style json and parse it to draw the debug menu
-
+            menuLayout = new MenuLayout();
+            var newArea = new MenuArea();
+            newArea.areaRect = new Rect(0, 0, 400, 600);
+            newArea.areaName = "";
+            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Box, "Test Box"));
+            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Space, "5"));
+            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Box, "Test Box 2"));
+            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Label, "Test Label"));
+            menuLayout.menuAreas.Add(newArea);
         }
 
         private void DrawDebugMenu()
         {
             if(!isActive)
                 return;
+
+            foreach(MenuArea _area in menuLayout.menuAreas)
+            {
+                GUILayout.BeginArea(_area.areaRect, _area.areaName, "box");
+
+                foreach(MenuProperty _property in _area.areaProperties)
+                {
+                    switch(_property.menuProperty)
+                    {
+                        case LayoutMenuProperties.Label:
+                        {
+                            GUILayout.Label(_property._value);
+                            break;
+                        }
+                        case LayoutMenuProperties.Space:
+                        {
+                            GUILayout.Space(int.Parse(_property._value));
+                            break;
+                        }
+                        case LayoutMenuProperties.Box:
+                        {
+                            GUILayout.Box(_property._value);
+                            break;
+                        }
+                    }
+                }
+
+                GUILayout.EndArea();
+            }
             
             /* GUILayout.BeginArea(new Rect(0, 0, 400, 600), "", "box");
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(400), GUILayout.Height(500));
