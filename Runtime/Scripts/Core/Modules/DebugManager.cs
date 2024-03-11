@@ -24,6 +24,7 @@ namespace core.modules
         Label,
         Box,
         Space,
+        Toggle
     }
 
     public class MenuProperty
