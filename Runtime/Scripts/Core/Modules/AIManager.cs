@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System;
 
 // TODO
-// Handles logic for enemy and friendly NPCs such as enabling and resetting and pooling characters
+// Handles logic for enemy and friendly NPCs such as enabling and resetting
+// No pooling required. Character need to be loaded and unloaded with the scenes to prevent memory overloading
+// Handle pathfinding optimizations (quality drop by distance)
+// Handle animation controller optimizations (timeslicing frames by distance)
 
 namespace core.modules
 {
@@ -12,7 +15,7 @@ namespace core.modules
     {
         public override void onInitialize()
         {
-
+            
         }
     }
 }

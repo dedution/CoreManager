@@ -24,7 +24,7 @@ namespace core.modules
         private ActorUpdater UpdateActors;
 
         // TODO
-        // Pooling and handling of game objects
+        // Pooling and handling of game objects such as particles
         // Needs to be created a Pool class to be reused across other modules and game logic
 
         public override void onInitialize()

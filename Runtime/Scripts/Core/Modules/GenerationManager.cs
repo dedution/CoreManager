@@ -15,5 +15,15 @@ namespace core.modules
         {
 
         }
+
+        public void GenerateDungeonLayout()
+        {
+
+        }
+
+        public void GenerateWorldTerrainHeightmap()
+        {
+
+        }
     }
 }
