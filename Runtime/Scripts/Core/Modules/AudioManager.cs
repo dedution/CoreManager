@@ -124,7 +124,7 @@ namespace core.modules
 
         private void MoveNextPool()
         {
-            if(AudioSourcePoolID <= POOLSIZE)
+            if(AudioSourcePoolID < POOLSIZE -1)
                 AudioSourcePoolID++;
             else
                 AudioSourcePoolID = 0;
