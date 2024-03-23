@@ -49,6 +49,12 @@ namespace core
             return Instance.coreDummyObject.StartCoroutine(_task);
         }
 
+        public static T CreateBehaviorOnDummy<T>() where T : Component
+        {
+            var _behavior = Instance.coreDummyObject.gameObject.AddComponent<T>();
+            return _behavior;
+        }
+
         // Easier access to module controller
         public static T GetLoadedModule<T>()
         {

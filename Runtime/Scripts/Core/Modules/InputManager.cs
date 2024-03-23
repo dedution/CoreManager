@@ -2,51 +2,125 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEngine.InputSystem;
 
 namespace core.modules
 {
     public class InputManager : BaseModule
     {
-        /* private delegate void ButtonDelegate();
-        private Dictionary<string, Action> m_ButtonDelegates = new Dictionary<string, Action>(); */
+        // TODO
+        // Handle switch between action maps (ex: for player and for UI)
+        // Handle load of json configurations for different platforms
+        // Use a default map inside this package with the default binds\
+        // Handle dynamic reconfiguration and loading over default
 
         private static InputManager _instance = null;
+        private PlayerInput m_PlayerInput;
+        private InputActionAsset m_DefaultActionAsset;
+        private DefaultActionControls _DefaultActions;
 
-        public InputManager() {
-            if(_instance == null)
+        // Action config by platform
+        private Dictionary<string, InputActionAsset> m_InputActionConfigs = new Dictionary<string, InputActionAsset>();
+
+        public InputManager()
+        {
+            if (_instance == null)
                 _instance = this;
         }
 
         public override void onInitialize()
         {
-            // Load Input configuration and populate dictionary of button actions 
-            // m_ButtonDelegates.Add("", delegate() {});
+            m_PlayerInput = GameManager.CreateBehaviorOnDummy<PlayerInput>();
+            m_PlayerInput.notificationBehavior = PlayerNotifications.InvokeUnityEvents;
+
+            // Load default Input
+            m_DefaultActionAsset = _DefaultActions.asset;
+            LoadActionAssetConfiguration(m_DefaultActionAsset);
         }
 
-        /* public override void UpdateModule()
+        public static void LoadActionAssetConfiguration(InputActionAsset _asset)
         {
-
+            // Set the action asset
+            _instance.m_PlayerInput.actions = _asset;
         }
 
-        // TODO
-        // Dynamic handling of inputs for controllers and prompt icon packs
-        // Loading configurations from external resources, allowing for complete sets of inputs without touching the codebase
-        // m_ButtonDelegates.Add("Jump", delegate() { onJump(); });
-
-        public static void BindToButton(string _buttonID, Action _bindAction)
+        public static void LoadActionAssetConfiguration(string _asset)
         {
-            if(_instance.m_ButtonDelegates.ContainsKey(_buttonID) && _instance.m_ButtonDelegates[_buttonID] != null)
-                _instance.m_ButtonDelegates[_buttonID] += _bindAction;
-
-            Debug.LogWarningFormat("Failed to bind action to button! [{}]", _buttonID);
+            // Set the action asset
+            GameManager.RunCoroutine(LoadActionAsset(_asset));
         }
 
-        public static void UnbindToButton(string _buttonID, Action _bindAction)
+        private static IEnumerator LoadActionAsset(string _asset)
         {
-            if(_instance.m_ButtonDelegates.ContainsKey(_buttonID) && _instance.m_ButtonDelegates[_buttonID] != null)
-                _instance.m_ButtonDelegates[_buttonID] -= _bindAction;
-            
-            Debug.LogWarningFormat("Failed to unbind action to button! [{}]", _buttonID);
-        } */
-    } 
+            ResourceRequest request = Resources.LoadAsync<InputActionAsset>(_asset);
+            yield return request;
+            LoadActionAssetConfiguration(request.asset as InputActionAsset);
+        }
+
+        public static void SwitchCurrentMap(string _map)
+        {
+            // Set the action asset
+            _instance.m_PlayerInput.SwitchCurrentActionMap(_map);
+        }
+
+        /* button was pressed or is held */
+        public static void onActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
+        {
+            _instance.m_PlayerInput.actions[_action].performed += _logicAction;
+        }
+
+        public static void UnsubscribeToActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
+        {
+            _instance.m_PlayerInput.actions[_action].performed -= _logicAction;
+        }
+
+        /* button was pressed */
+        public static void onActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
+        {
+            _instance.m_PlayerInput.actions[_action].started += _logicAction;
+        }
+
+        /* button was released */
+        public static void onActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
+        {
+            _instance.m_PlayerInput.actions[_action].canceled += _logicAction;
+        }
+
+        public static void UnsubscribeToActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
+        {
+            _instance.m_PlayerInput.actions[_action].started -= _logicAction;
+        }
+
+        public static void UnsubscribeToActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
+        {
+            _instance.m_PlayerInput.actions[_action].canceled -= _logicAction;
+        }
+
+        public static bool IsActionPressed(string _action)
+        {
+            return _instance.m_PlayerInput.actions[_action].IsPressed();
+        }
+
+        public static bool IsActionReleased(string _action)
+        {
+            return _instance.m_PlayerInput.actions[_action].WasReleasedThisFrame();
+        }
+
+        public static bool IsActionPressedThisFrame(string _action)
+        {
+            return _instance.m_PlayerInput.actions[_action].WasPressedThisFrame();
+        }
+
+        // Read direct values from action
+        public static T ReadActionValue<T>(string _action) where T : struct
+        {
+            return _instance.m_PlayerInput.actions[_action].ReadValue<T>();
+        }
+
+        // Here for now
+        public static void LimitGamepadToFirst()
+        {
+            _instance.m_PlayerInput.currentActionMap.devices = new[] { Gamepad.all[0] };
+        }
+    }
 }
