@@ -17,7 +17,7 @@ namespace core.modules
         private static InputManager _instance = null;
         private PlayerInput m_PlayerInput;
         private InputActionAsset m_DefaultActionAsset;
-        private DefaultActionControls _DefaultActions;
+        private DefaultActionControls _DefaultActions = new DefaultActionControls();
 
         // Action config by platform
         private Dictionary<string, InputActionAsset> m_InputActionConfigs = new Dictionary<string, InputActionAsset>();
