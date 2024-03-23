@@ -23,7 +23,7 @@ namespace core.modules
 
         public virtual void UpdateModule()
         {
-
+            
         }
 
         public virtual void OnGUI()
