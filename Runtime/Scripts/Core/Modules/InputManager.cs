@@ -22,6 +22,8 @@ namespace core.modules
         // Action config by platform
         private Dictionary<string, InputActionAsset> m_InputActionConfigs = new Dictionary<string, InputActionAsset>();
 
+        // Load buttons by platform as well
+
         public InputManager()
         {
             if (_instance == null)
@@ -36,6 +38,11 @@ namespace core.modules
             // Load default Input
             m_DefaultActionAsset = _DefaultActions.asset;
             LoadActionAssetConfiguration(m_DefaultActionAsset);
+
+            // Try to load a default Input from Resources
+            LoadActionAssetConfiguration("Input/DefaultInputAsset");
+
+            // Load overrides?
         }
 
         public static void LoadActionAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
@@ -55,7 +62,11 @@ namespace core.modules
         {
             ResourceRequest request = Resources.LoadAsync<InputActionAsset>(_asset);
             yield return request;
-            LoadActionAssetConfiguration(request.asset as InputActionAsset, _currentActionMap);
+            
+            if(request.asset != null)
+                LoadActionAssetConfiguration(request.asset as InputActionAsset, _currentActionMap);
+            else
+                Debug.LogWarning("[RESOURCES] Default Input Asset not found!");
         }
 
         public static void SwitchCurrentMap(string _map)
