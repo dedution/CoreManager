@@ -38,23 +38,24 @@ namespace core.modules
             LoadActionAssetConfiguration(m_DefaultActionAsset);
         }
 
-        public static void LoadActionAssetConfiguration(InputActionAsset _asset)
+        public static void LoadActionAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
         {
             // Set the action asset
             _instance.m_PlayerInput.actions = _asset;
+            SwitchCurrentMap(_currentActionMap);
         }
 
-        public static void LoadActionAssetConfiguration(string _asset)
+        public static void LoadActionAssetConfiguration(string _asset, string _currentActionMap = "Player")
         {
             // Set the action asset
-            GameManager.RunCoroutine(LoadActionAsset(_asset));
+            GameManager.RunCoroutine(LoadActionAsset(_asset, _currentActionMap));
         }
 
-        private static IEnumerator LoadActionAsset(string _asset)
+        private static IEnumerator LoadActionAsset(string _asset, string _currentActionMap = "Player")
         {
             ResourceRequest request = Resources.LoadAsync<InputActionAsset>(_asset);
             yield return request;
-            LoadActionAssetConfiguration(request.asset as InputActionAsset);
+            LoadActionAssetConfiguration(request.asset as InputActionAsset, _currentActionMap);
         }
 
         public static void SwitchCurrentMap(string _map)
