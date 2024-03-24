@@ -24,6 +24,8 @@ namespace core.modules
 
         // Load buttons by platform as well
 
+        public static bool isBusyLoading = true;
+
         public InputManager()
         {
             if (_instance == null)
@@ -38,11 +40,22 @@ namespace core.modules
             // Load default Input
             m_DefaultActionAsset = _DefaultActions.asset;
             LoadActionAssetConfiguration(m_DefaultActionAsset);
+            isBusyLoading = false;
 
             // Try to load a default Input from Resources
-            LoadActionAssetConfiguration("Input/DefaultInputAsset");
+            LoadActionAssetConfiguration("Input/DefaultInputAsset", "Player");
 
             // Load overrides?
+        }
+
+        public static string GetCurrentScheme()
+        {
+            return _instance.m_PlayerInput.currentControlScheme;
+        }
+
+        public static bool IsUsingGamepad()
+        {
+            return _instance.m_PlayerInput.currentControlScheme == "Gamepad";
         }
 
         public static void LoadActionAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
@@ -52,10 +65,24 @@ namespace core.modules
             SwitchCurrentMap(_currentActionMap);
         }
 
-        public static void LoadActionAssetConfiguration(string _asset, string _currentActionMap = "Player")
+        public static void LoadActionAssetConfiguration(string _asset, string _currentActionMap = "Player", bool useAsync = false)
         {
+            isBusyLoading = true;
+
             // Set the action asset
-            GameManager.RunCoroutine(LoadActionAsset(_asset, _currentActionMap));
+            if(useAsync)
+                GameManager.RunCoroutine(LoadActionAsset(_asset, _currentActionMap));
+            else
+            {
+                InputActionAsset _inputdata = Resources.Load<InputActionAsset>(_asset);
+
+                if(_inputdata != null)
+                    LoadActionAssetConfiguration(_inputdata, _currentActionMap);
+                else
+                    Debug.LogWarning("[RESOURCES] Default Input Asset not found!");
+
+                isBusyLoading = false;
+            }
         }
 
         private static IEnumerator LoadActionAsset(string _asset, string _currentActionMap = "Player")
@@ -67,6 +94,8 @@ namespace core.modules
                 LoadActionAssetConfiguration(request.asset as InputActionAsset, _currentActionMap);
             else
                 Debug.LogWarning("[RESOURCES] Default Input Asset not found!");
+
+            isBusyLoading = false;
         }
 
         public static void SwitchCurrentMap(string _map)
