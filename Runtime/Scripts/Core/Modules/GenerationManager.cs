@@ -26,6 +26,12 @@ namespace core.modules
         {
 
         }
+        
+        public override void UpdateModule()
+        {
+            if(!ReferenceEquals(_instance.m_GridWorldSystem, null))
+                _instance.m_GridWorldSystem.onUpdate();
+        }
 
         public static void InitializeGridWorld(int _pieceSize, Camera _mainCamera)
         {
