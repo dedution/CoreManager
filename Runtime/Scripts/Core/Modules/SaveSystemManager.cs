@@ -2,30 +2,12 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using core.gameplay;
 
 namespace core.modules
 {
-    // Save and load game data and configs
-    
-
     public class SaveSystemManager : BaseModule
     {
-        [System.Serializable]
-        public struct SaveData
-        {
-            public bool Enabled;
-            public string GUID;
-            public object Data;
-
-            public void GenerateGUID()
-            {
-                if (string.IsNullOrWhiteSpace(GUID))
-                {
-                    GUID = System.Guid.NewGuid().ToString();
-                }
-            }
-        }
-
         private Dictionary<string, object> m_LocalSaveData = new Dictionary<string, object>();
         private Dictionary<string, string> m_LocalConfigData = new Dictionary<string, string>();
 
@@ -112,8 +94,11 @@ namespace core.modules
         {
             if(!_actor.Enabled)
                 return;
-                
-            m_LocalSaveData.Add(_actor.GUID, _actor.Data);
+            
+            if(m_LocalSaveData.ContainsKey(_actor.GUID))
+                m_LocalSaveData[_actor.GUID] = _actor.Data;
+            else
+                m_LocalSaveData.Add(_actor.GUID, _actor.Data);
         }
 
         public void SaveSystem_Game_Get(SaveData _actor)
@@ -126,7 +111,7 @@ namespace core.modules
             if(m_LocalSaveData.ContainsKey(_actor.GUID))
                 m_LocalSaveData.TryGetValue(_actor.GUID, out _data);
 
-            _actor.Data = _data;
+            _actor.Data = _data as Dictionary<string, object>;
         }
 
         public void SaveSystem_Game_Save()

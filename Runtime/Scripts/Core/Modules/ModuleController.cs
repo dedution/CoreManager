@@ -9,19 +9,27 @@ namespace core
 {
     public class ModuleController
     {
-        /** Module loader and controller
-        * Some of these modules have direct instance access via semi-singleton implementation to facilitate frequent calls
-        */
+        /// <summary>
+        /// Module loader and controller
+        /// Some of these modules have direct instance access 
+        /// via semi-singleton implementation to facilitate frequent calls
+        /// 
+        /// TODO:
+        /// Module initialized order from a json as well as selective module initialization
+        /// </summary>
 
         private List<BaseModule> activeModules = new List<BaseModule>();
 
         public ModuleController()
         {
+            // Load json from streaming assets? or resources with the order and enabled modules as well as other configs
+            // By default everything gets loaded like it was doing before
         }
 
         public void Init(CoreDummyObject coreDummyObject)
         {
-            // Initialize modules - uses dummy object namespace to find other classes in the same namepsace and inits them
+            // Initialize modules - uses dummy object namespace to find other classes 
+            // in the same namespace and instantiates them
             foreach (BaseModule _module in InstantiateModules<BaseModule>(coreDummyObject))
             {
                 activeModules.Add(_module);
@@ -34,6 +42,7 @@ namespace core
             }
 
             // Initialize modules -- prevents load order problems.
+            // When reordering of modules is implemented, this hack wont be necessary
             activeModules.ForEach(delegate(BaseModule _module) {_module.onInitialize();});
 
             Debug.Log("# Modules Loaded! (" + activeModules.Count + ")");
@@ -48,6 +57,7 @@ namespace core
 
         private List<Type> SearchTypeInNamespace(object instance)
         {
+            // Rework this logic to re-order and only load specific modules
             string ns = instance.GetType().Namespace;
             Type instanceType = instance.GetType();
             List<Type> results = instance.GetType().Assembly.GetTypes().Where(tt => tt.Namespace == ns &&
