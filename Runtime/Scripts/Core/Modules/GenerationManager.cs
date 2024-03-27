@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Generation.DynamicGrid;
+using Generation.RunnerWorld;
 using UnityEngine;
 
 namespace core.modules
@@ -15,6 +16,7 @@ namespace core.modules
     {
         private static GenerationManager _instance = null;
         private GridWorldManager m_GridWorldSystem;
+        private RunnerWorldController m_RunnerWorldSystem;
 
         public GenerationManager()
         {
@@ -31,11 +33,33 @@ namespace core.modules
         {
             if(!ReferenceEquals(_instance.m_GridWorldSystem, null))
                 _instance.m_GridWorldSystem.onUpdate();
+
+            if(!ReferenceEquals(_instance.m_RunnerWorldSystem, null))
+                _instance.m_RunnerWorldSystem.onUpdate();
+        }
+
+        public static void InitializeRunnerWorld(GameObject _prefab, int _pieceSize, int _pieceNumber)
+        {
+            _instance.m_RunnerWorldSystem = new RunnerWorldController(_prefab, _pieceSize, _pieceNumber);
+        }
+
+        public static void UpdateRunnerWorldSpeed(float speed)
+        {
+            if(!ReferenceEquals(_instance.m_RunnerWorldSystem, null))
+                _instance.m_RunnerWorldSystem.m_MoveSpeed = speed;
         }
 
         public static void InitializeGridWorld(int _pieceSize, Camera _mainCamera)
         {
             _instance.m_GridWorldSystem = new GridWorldManager(_pieceSize, _mainCamera);
+        }
+
+        public static RunnerWorldController GetRunnerWorldManager()
+        {
+            if(_instance.m_RunnerWorldSystem == null)
+                Debug.LogError("Runner World Manager wasn't initialized!");
+
+            return _instance.m_RunnerWorldSystem;
         }
 
         public static GridWorldManager GetGridWorldManager()
@@ -49,12 +73,6 @@ namespace core.modules
         public void GenerateDungeonLayout()
         {
             // Port world generation algorithm from Project Sphere
-        }
-
-        public void GenerateInfiniteRunner()
-        {
-            // Port logic from Magia do Saber for the infinite runner
-            // Consider moving that logic into a separate module when port is done
         }
     }
 }
