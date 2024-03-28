@@ -1,4 +1,5 @@
 
+using System;
 using UnityEngine;
 
 namespace core.modules
@@ -11,9 +12,9 @@ namespace core.modules
         {
         }
 
-        public string Module_GetType()
+        public Type Module_GetType()
         {
-            return this.GetType().ToString().Replace("core.modules.", "");
+            return this.GetType();
         }
 
         public virtual void onInitialize()

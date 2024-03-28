@@ -17,8 +17,7 @@ namespace core
         /// TODO:
         /// Module initialized order from a json as well as selective module initialization
         /// </summary>
-
-        private List<BaseModule> activeModules = new List<BaseModule>();
+        private Dictionary<Type, BaseModule> activeModules = new Dictionary<Type, BaseModule>();
 
         public ModuleController()
         {
@@ -32,27 +31,30 @@ namespace core
             // in the same namespace and instantiates them
             foreach (BaseModule _module in InstantiateModules<BaseModule>(coreDummyObject))
             {
-                activeModules.Add(_module);
+                activeModules.Add(_module.Module_GetType(), _module);
 
                 //Register unity calls to delegates
                 coreDummyObject.unity_GUIDelegate += _module.OnGUI;
                 coreDummyObject.unity_UpdateDelegate += _module.UpdateModule;
 
                 _module.MonoObject = coreDummyObject;
+                _module.onInitialize();
             }
-
-            // Initialize modules -- prevents load order problems.
-            // When reordering of modules is implemented, this hack wont be necessary
-            activeModules.ForEach(delegate(BaseModule _module) {_module.onInitialize();});
 
             Debug.Log("# Modules Loaded! (" + activeModules.Count + ")");
         }
+
         public T FindModule<T>()
         {
-            var _obj = activeModules.OfType<T>().ElementAt(0);
-            if(_obj == null) Debug.LogError("Couldn't find loaded module: " + typeof(T));
+            var _type = typeof(T);
+            var _obj = activeModules[_type];
 
-            return (T)_obj;
+            if(_obj == null) {
+                Debug.LogError("Couldn't find loaded module: " + _type);
+                return default(T);
+            }
+
+            return (T)Convert.ChangeType(_obj, _type);
         }
 
         private List<Type> SearchTypeInNamespace(object instance)
