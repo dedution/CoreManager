@@ -27,7 +27,7 @@ namespace core.modules
     {
         private Dictionary<string, Action<Dictionary<string, object>>> eventDictionary;
 
-        private static EventManager _instance = null;
+        public static EventManager _instance = null;
 
         public EventManager() {
             if(_instance == null)

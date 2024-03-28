@@ -29,5 +29,8 @@ namespace core.modules
         public virtual void OnGUI()
         {
         }
+
+        public void Hello()
+        {}
     }
 }
