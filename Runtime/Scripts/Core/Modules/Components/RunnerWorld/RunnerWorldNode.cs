@@ -6,14 +6,14 @@ namespace Generation.RunnerWorld
 {
     public class RunnerWorldNode : MonoBehaviour
     {
-        public void ClearNode()
+        public virtual void ClearNode()
         {
-
+            // Clear props and obstacles
         }
 
-        public void RandomizeNode()
+        public virtual void RandomizeNode()
         {
-
+            // Randomize props and obstacles and pickables
         }
 
         public float GetPosition()

@@ -21,6 +21,9 @@ namespace Generation.RunnerWorld
         [Range(5, 15)]
         private int m_NodeSize = 10;
 
+        [Range(0, 5)]
+        public int m_NodeEmptyStartNodes = 2;
+
         private bool m_enabled = false;
 
         public RunnerWorldController(GameObject nodePrefab, int nodeSize = 10, int nodeNumber = 15)
@@ -63,6 +66,10 @@ namespace Generation.RunnerWorld
             {
                 GameObject temp = Object.Instantiate(m_NodePrefab);
                 RunnerWorldNode node = temp.GetComponent<RunnerWorldNode>();
+                if(i < m_NodeEmptyStartNodes)
+                    node.ClearNode();
+                else
+                    node.RandomizeNode();
 
                 temp.transform.localEulerAngles = new Vector3(0, 0, 0);
                 temp.transform.localPosition = new Vector3(0, 0, m_NodeSize * i);
@@ -83,6 +90,7 @@ namespace Generation.RunnerWorld
                 if (m_RunnerNodes[i].GetPosition() < -m_NodeSize)
                 {
                     m_RunnerNodes[i].SetPosition(_previous.GetPosition() + m_NodeSize);
+                    m_RunnerNodes[i].RandomizeNode();
                     wasTeleported = true;
                 }
 
