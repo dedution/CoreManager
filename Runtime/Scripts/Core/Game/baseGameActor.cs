@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using core.modules;
-using static core.modules.SaveSystemManager;
 using System;
+using static core.GameManager;
 
 namespace core.gameplay
 {
@@ -35,10 +35,10 @@ namespace core.gameplay
         void Start()
         {
             // Try to init modules just in case
-            GameManager.Instance.Init();
+            Instance.Init();
 
             // Register Actor
-            GameManager.GetLoadedModule<ActorManager>().RegisterActor(this);
+            GetLoadedModule<ActorManager>().RegisterActor(this);
 
             // Load saved data (maybe add a way for a possible reload of actors data)
             SaveSystem_Load();
@@ -60,12 +60,12 @@ namespace core.gameplay
         // Keep these two functions untouched for now
         protected void SaveSystem_Load()
         {
-            GameManager.GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Get(saveData);
+            GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Get(saveData);
         }
 
         protected void SaveSystem_Save()
         {
-            GameManager.GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Set(saveData);
+            GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Set(saveData);
         }
 
         protected T SaveSystem_GetData<T>(string _dataKey, T _defaultData)
@@ -100,7 +100,7 @@ namespace core.gameplay
             SaveSystem_Save();
 
             // Unregister Actor
-            GameManager.GetLoadedModule<ActorManager>().UnregisterActor(this);
+            GetLoadedModule<ActorManager>().UnregisterActor(this);
 
             onDestroy();
         }

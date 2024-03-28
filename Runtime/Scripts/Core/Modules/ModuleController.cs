@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using core.modules;
 using UnityEngine;
+using static core.GameManager;
 
 namespace core
 {
@@ -23,6 +24,7 @@ namespace core
         {
             // Load json from streaming assets? or resources with the order and enabled modules as well as other configs
             // By default everything gets loaded like it was doing before
+            GetLoadedModule<ResourceManager>().Hello();
         }
 
         public void Init(CoreDummyObject coreDummyObject)
