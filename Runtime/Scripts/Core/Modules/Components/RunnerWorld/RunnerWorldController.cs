@@ -66,6 +66,7 @@ namespace Generation.RunnerWorld
             {
                 GameObject temp = Object.Instantiate(m_NodePrefab);
                 RunnerWorldNode node = temp.GetComponent<RunnerWorldNode>();
+                
                 if(i < m_NodeEmptyStartNodes)
                     node.ClearNode();
                 else

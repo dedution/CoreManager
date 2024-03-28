@@ -73,6 +73,8 @@ namespace core.modules
         public void GenerateDungeonLayout()
         {
             // Port world generation algorithm from Project Sphere
+            // Optimize the dungeon generation algorithm for better performance and speed while 
+            // baking probes, navmesh and such
         }
     }
 }
