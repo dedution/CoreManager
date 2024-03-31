@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Unity.Plastic.Newtonsoft.Json;
+using static core.GameManager;
 using static core.IOController;
 
 namespace core.modules
@@ -33,7 +34,7 @@ namespace core.modules
 
         public void AddData(Type _key, T _value)
         {
-            if(keys == null || values == null)
+            if (keys == null || values == null)
             {
                 keys = new List<Type>();
                 values = new List<T>();
@@ -41,7 +42,7 @@ namespace core.modules
                 keys.Add(_key);
                 values.Add(_value);
             }
-            else if(keys.Contains(_key))
+            else if (keys.Contains(_key))
                 values[GetKeyID(_key)] = _value;
             else
             {
@@ -52,7 +53,7 @@ namespace core.modules
 
         public bool ContainsKey(Type _key)
         {
-            if(keys != null)
+            if (keys != null)
                 return keys.Contains(_key);
             else
                 return false;
@@ -66,7 +67,7 @@ namespace core.modules
 
         public T GetData(Type _key, T _defaultData)
         {
-            if(keys != null && keys.Contains(_key))
+            if (keys != null && keys.Contains(_key))
                 return values[GetKeyID(_key)];
             else
                 return _defaultData;
@@ -107,7 +108,7 @@ namespace core.modules
         {
             string _dataParse = DataToBinaryString(data);
 
-            if(gameSaveData.GameData.ContainsKey(actorGUID))
+            if (gameSaveData.GameData.ContainsKey(actorGUID))
                 gameSaveData.GameData.GetData(actorGUID).AddData(key, _dataParse);
             else
             {
@@ -120,7 +121,7 @@ namespace core.modules
         {
             string _stringDefaultData = DataToBinaryString(defaultData);
 
-            if(gameSaveData.GameData.ContainsKey(actorGUID))
+            if (gameSaveData.GameData.ContainsKey(actorGUID))
             {
                 string _rawdata = gameSaveData.GameData.GetData(actorGUID).GetData(key, _stringDefaultData);
                 return BinaryStringToData<T>(_rawdata);
@@ -132,8 +133,7 @@ namespace core.modules
         public void SaveSystem_Game_Save()
         {
             // Save data to file
-            EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", true } });
-
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", true } }); });
             string _Path = GetSavePath();
 
             Debug.Log("Saving data to: " + _Path);
@@ -144,7 +144,7 @@ namespace core.modules
         public void SaveSystem_Game_Load()
         {
             // Load and process data from file
-            EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", true } });
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", true } }); });
 
             string _Path = GetSavePath();
 
@@ -157,7 +157,7 @@ namespace core.modules
         {
             string _Path = Path.Combine(Application.persistentDataPath, "savedata");
 
-            if(!Directory.Exists(_Path))
+            if (!Directory.Exists(_Path))
                 Directory.CreateDirectory(_Path);
 
             return Path.Combine(_Path, "data.dat");
@@ -166,14 +166,14 @@ namespace core.modules
         private void onSaveDataSuccess()
         {
             Debug.Log("SAVE SUCESSFULL!");
-            EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", false } });
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", false } }); });
         }
 
         private void onLoadDataSuccess(GameSaveData _data)
         {
             Debug.Log("LOAD SUCESSFULL!");
             gameSaveData = _data;
-            EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", false } });
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", false } }); });
         }
     }
 }

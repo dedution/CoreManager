@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using core.gameplay;
 using core.modules;
 using UnityEngine;
+using static core.GameManager;
 
 namespace Generation.DynamicGrid
 {
@@ -30,13 +31,13 @@ namespace Generation.DynamicGrid
             Vector3 _newposition = SaveSystem_GetData("position", transform.position);
             transform.position = _newposition;
             
-            if(AutoRegisterPiece && GenerationManager.GetGridWorldManager() != null)
+            if(AutoRegisterPiece)
                 RegisterPieceOnGridWorld();
         }
 
         public void RegisterPieceOnGridWorld()
         {
-            GenerationManager.GetGridWorldManager().GridWorld_AddChunk(this);
+            ActOnModule((GridWorldManager _ref) => { _ref.GridWorld_AddChunk(this); });
         }
 
         public void UpdateChunkPosition(Vector3 _newPosition)

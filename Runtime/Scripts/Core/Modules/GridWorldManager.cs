@@ -1,16 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using core.gameplay;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
+using Generation.DynamicGrid;
 
-/// <summary>
-/// Port of forest grid system from evil below
-/// This legacy code will have more cleanups but its algorithm will remain the same as legacy
-/// </summary>
-namespace Generation.DynamicGrid
+namespace core.modules
 {
-    public class GridWorldManager
+    public class GridWorldManager : BaseModule
     {
         private List<GridWorldPiece> GridWorldChunks = new List<GridWorldPiece>();
         private int GridChunk_CurrentIndex = 4;
@@ -19,14 +14,14 @@ namespace Generation.DynamicGrid
         private bool m_wasInit = false;
         private bool m_isEnabled = true;
 
-        public GridWorldManager(int _chunkSize, Camera _mainCamera)
+        public void GridWorldManager_Init(int _chunkSize, Camera _mainCamera)
         {
             // Sets the necessary parameters for the grid manager to function properly
             GridChunk_Size = _chunkSize;
             m_GameCamera = _mainCamera;
         }
 
-        public void onUpdate()
+        public override void UpdateModule()
         {
             if (m_wasInit && m_isEnabled)
                 GridWorld_Update();

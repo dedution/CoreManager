@@ -27,60 +27,41 @@ namespace core.modules
     {
         private Dictionary<string, Action<Dictionary<string, object>>> eventDictionary;
 
-        public static EventManager _instance = null;
-
-        public EventManager() {
-            if(_instance == null)
-                _instance = this;
-            
-            if (eventDictionary == null)
-                eventDictionary = new Dictionary<string, Action<Dictionary<string, object>>>();
-        }
-
         public override void onInitialize()
         {
-            
+            eventDictionary = new Dictionary<string, Action<Dictionary<string, object>>>();
         }
 
-        public static void StartListening(string eventName, Action<Dictionary<string, object>> listener)
+        public void StartListening(string eventName, Action<Dictionary<string, object>> listener)
         {
-            if(_instance == null)
-                return;
-                
             Action<Dictionary<string, object>> thisEvent;
 
-            if (_instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+            if (eventDictionary.TryGetValue(eventName, out thisEvent))
             {
                 thisEvent += listener;
-                _instance.eventDictionary[eventName] = thisEvent;
+                eventDictionary[eventName] = thisEvent;
             }
             else
             {
                 thisEvent += listener;
-                _instance.eventDictionary.Add(eventName, thisEvent);
+                eventDictionary.Add(eventName, thisEvent);
             }
         }
 
-        public static void StopListening(string eventName, Action<Dictionary<string, object>> listener)
+        public void StopListening(string eventName, Action<Dictionary<string, object>> listener)
         {
-            if(_instance == null)
-                return;
-                
             Action<Dictionary<string, object>> thisEvent;
-            if (_instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+            if (eventDictionary.TryGetValue(eventName, out thisEvent))
             {
                 thisEvent -= listener;
-                _instance.eventDictionary[eventName] = thisEvent;
+                eventDictionary[eventName] = thisEvent;
             }
         }
 
-        public static void TriggerEvent(string eventName, Dictionary<string, object> message)
+        public void TriggerEvent(string eventName, Dictionary<string, object> message)
         {
-            if(_instance == null)
-                return;
-                
             Action<Dictionary<string, object>> thisEvent = null;
-            if (_instance.eventDictionary.TryGetValue(eventName, out thisEvent))
+            if (eventDictionary.TryGetValue(eventName, out thisEvent))
             {
                 thisEvent.Invoke(message);
             }

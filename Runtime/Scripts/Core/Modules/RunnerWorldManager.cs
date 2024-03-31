@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Generation.RunnerWorld;
 using UnityEngine;
 
-namespace Generation.RunnerWorld
+namespace core.modules
 {
-    public class RunnerWorldController
+    public class RunnerWorldManager : BaseModule
     {
         private GameObject m_NodePrefab;
         public List<RunnerWorldNode> m_RunnerNodes = new List<RunnerWorldNode>();
@@ -26,11 +27,6 @@ namespace Generation.RunnerWorld
 
         private bool m_enabled = false;
 
-        public RunnerWorldController(GameObject nodePrefab, int nodeSize = 10, int nodeNumber = 15)
-        {
-            Runner_Init(nodePrefab,nodeSize, nodeNumber);
-        }
-
         public void Runner_Init(GameObject nodePrefab, int nodeSize = 10, int nodeNumber = 15)
         {
             m_enabled = true;
@@ -40,8 +36,13 @@ namespace Generation.RunnerWorld
 
             Runner_PopulateNodes();
         }
+        
+        public override void onInitialize()
+        {
 
-        public void onUpdate()
+        }
+
+        public override void UpdateModule()
         {
             if(m_enabled)
                 Runner_UpdateNodes();

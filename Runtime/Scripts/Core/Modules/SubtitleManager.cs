@@ -20,7 +20,8 @@ namespace core.modules
         {
             // Update SETTINGS_ALLOWSUBTITLES through an event with the correct state
             //Subtitle_Enabled = GetLoadedModule<SaveSystemManager>().SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false);
-            EventManager.StartListening("SubtitleManager", OnSaveSystem);
+
+            ActOnModule((EventManager _ref) => { _ref.StartListening("SubtitleManager", OnSaveSystem); });
         }
 
         void OnSaveSystem(Dictionary<string, object> param)
@@ -32,7 +33,7 @@ namespace core.modules
         {
             currentSubtitleTimer = currentSubtitleTimer < 0 ? 0 : currentSubtitleTimer - Time.deltaTime;
 
-            if(currentSubtitleTimer > 0 || SubtitleQueue.Count == 0 || InformSubtitle == null)
+            if (currentSubtitleTimer > 0 || SubtitleQueue.Count == 0 || InformSubtitle == null)
                 return;
 
             string _subtitle = SubtitleQueue.Keys.ElementAt(0);
@@ -44,7 +45,7 @@ namespace core.modules
 
         public void Subtitles_Say_Immediate(string subtitle, float time)
         {
-            if(!Subtitle_Enabled || InformSubtitle == null) return;
+            if (!Subtitle_Enabled || InformSubtitle == null) return;
 
             InformSubtitle(subtitle, time);
             currentSubtitleTimer = time;
@@ -57,8 +58,8 @@ namespace core.modules
 
         public void Subtitles_ClearDisplayers()
         {
-            if(!Subtitle_Enabled || InformSubtitle == null) return;
-            
+            if (!Subtitle_Enabled || InformSubtitle == null) return;
+
             // Inform a cleanup of current subtitle
             InformSubtitle("", 0.1f);
         }
