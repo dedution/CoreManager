@@ -57,7 +57,7 @@ namespace core
         }
 
         // Easier direct access to module reference
-        public static T GetLoadedModule<T>()
+        private static T GetLoadedModule<T>()
         {
             var _obj = Instance.moduleController.FindModule<T>();
             return (T)_obj;
@@ -66,7 +66,6 @@ namespace core
         // Safer way to use logic that interacts with modules without worrying if module even exists
         // Example how to use:
         // ActOnModule<ModuleName>((ModuleName _ref) => {_ref.Hello();});
-        
         public static void ActOnModule<T>(Action<T> _logic)
         {
             T _module = GetLoadedModule<T>();
