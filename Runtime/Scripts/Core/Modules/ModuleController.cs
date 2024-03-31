@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using core.modules;
 using UnityEngine;
@@ -10,27 +11,57 @@ namespace core
 {
     public class ModuleController
     {
+        // Configuration JSON
+        [System.Serializable]
+        public struct ModuleConfig
+        {
+            public List<string> Modules;
+        }
+
         /// <summary>
         /// Module loader and controller
-        /// Some of these modules have direct instance access 
-        /// via semi-singleton implementation to facilitate frequent calls
-        /// 
-        /// TODO:
-        /// Module initialized order from a json as well as selective module initialization
         /// </summary>
         private Dictionary<Type, BaseModule> activeModules = new Dictionary<Type, BaseModule>();
+        private ModuleConfig ModulesConfiguration = new ModuleConfig();
+        private bool isConfigurationLoaded = false;
+        private bool useJSONAutoSave = true;
+        private string MODULECONFIGPATH;
+        private string CONFIGFILENAME = "moduleconfig.json";
 
         public ModuleController()
         {
-            // Load json from streaming assets? or resources with the order and enabled modules as well as other configs
-            // By default everything gets loaded like it was doing before
-            GetLoadedModule<ResourceManager>().Hello();
+            // Load json from streaming assets
+            ModulesConfiguration.Modules = new List<string>();
+            MODULECONFIGPATH = Path.Combine(Application.streamingAssetsPath, "modules");
+
+            // Create streaming assets if missing
+            if(!Directory.Exists(MODULECONFIGPATH))
+                Directory.CreateDirectory(MODULECONFIGPATH);
+
+            string _modulePath = Path.Combine(MODULECONFIGPATH, CONFIGFILENAME);
+            IOController.ReadJSONFromFile<ModuleConfig>(_modulePath, false, ProcessConfig);
+        }
+
+        public void SaveCurrentConfig()
+        {
+            string _modulePath = Path.Combine(MODULECONFIGPATH, CONFIGFILENAME);
+
+            foreach(Type _type in activeModules.Keys)
+                ModulesConfiguration.Modules.Add(_type.ToString());
+            
+            if(!File.Exists(_modulePath))
+                IOController.WriteJSONToFile<ModuleConfig>(_modulePath, ModulesConfiguration, true, false);
+        }
+
+        private void ProcessConfig(ModuleConfig _data)
+        {
+            ModulesConfiguration = _data;
+            isConfigurationLoaded = true;
         }
 
         public void Init(CoreDummyObject coreDummyObject)
         {
-            // Initialize modules - uses dummy object namespace to find other classes 
-            // in the same namespace and instantiates them
+            // Initialize modules
             foreach (BaseModule _module in InstantiateModules<BaseModule>(coreDummyObject))
             {
                 activeModules.Add(_module.Module_GetType(), _module);
@@ -40,8 +71,22 @@ namespace core
                 coreDummyObject.unity_UpdateDelegate += _module.UpdateModule;
 
                 _module.MonoObject = coreDummyObject;
-                _module.onInitialize();
+
+                if(!isConfigurationLoaded)
+                    _module.onInitialize();
             }
+
+            // Initialization by order of config
+            if (isConfigurationLoaded)
+            {
+                foreach (string _typeString in ModulesConfiguration.Modules)
+                {
+                    var _module = activeModules[Type.GetType(_typeString)];
+                    _module.onInitialize();                    
+                }
+            }
+            else if(useJSONAutoSave)
+                SaveCurrentConfig();
 
             Debug.Log("# Modules Loaded! (" + activeModules.Count + ")");
         }
@@ -51,7 +96,7 @@ namespace core
             var _type = typeof(T);
             var _obj = activeModules[_type];
 
-            if(_obj == null) {
+            if(ReferenceEquals(_obj, null)) {
                 Debug.LogError("Couldn't find loaded module: " + _type);
                 return default(T);
             }
@@ -61,7 +106,6 @@ namespace core
 
         private List<Type> SearchTypeInNamespace(object instance)
         {
-            // Rework this logic to re-order and only load specific modules
             string ns = instance.GetType().Namespace;
             Type instanceType = instance.GetType();
             List<Type> results = instance.GetType().Assembly.GetTypes().Where(tt => tt.Namespace == ns &&
@@ -77,6 +121,11 @@ namespace core
             {
                 if (t.IsSubclassOf(typeof(T)))
                 {
+                    if(isConfigurationLoaded && !ModulesConfiguration.Modules.Contains(t.ToString()))
+                    {
+                        Debug.LogWarning("# Skipping load of module: " + t.ToString());
+                        continue;
+                    }
                     T i = (T)Activator.CreateInstance(t);
                     instances.Add(i);
                 }

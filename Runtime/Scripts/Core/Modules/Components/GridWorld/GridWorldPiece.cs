@@ -27,7 +27,7 @@ namespace Generation.DynamicGrid
         protected override void onStart()
         {
             // Register to manager, only after save data is loaded
-            Vector3 _newposition = SaveSystem_GetData<Vector3>("position", transform.position);
+            Vector3 _newposition = SaveSystem_GetData("position", transform.position);
             transform.position = _newposition;
             
             if(AutoRegisterPiece && GenerationManager.GetGridWorldManager() != null)

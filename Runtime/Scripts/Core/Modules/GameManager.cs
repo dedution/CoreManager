@@ -23,7 +23,8 @@ namespace core
             UnityEngine.Object.DontDestroyOnLoad(coreDummyObject.gameObject);
         }
 
-        public static GameManager Instance
+        // Avoid access to the instance
+        private static GameManager Instance
         {
             get
             {
@@ -35,12 +36,12 @@ namespace core
         }
 
         // Initialize
-        public void Init()
+        public static void Init()
         {
-            if (!m_gameManagerWasInit)
+            if (!Instance.m_gameManagerWasInit)
             {
-                moduleController.Init(coreDummyObject);
-                m_gameManagerWasInit = true;
+                Instance.moduleController.Init(Instance.coreDummyObject);
+                Instance.m_gameManagerWasInit = true;
             }
         }
 
@@ -55,11 +56,23 @@ namespace core
             return _behavior;
         }
 
-        // Easier access to module controller
+        // Easier direct access to module reference
         public static T GetLoadedModule<T>()
         {
             var _obj = Instance.moduleController.FindModule<T>();
-            return (T)_obj; //Returns the first module found -- needs better handling in case of lack of modules
+            return (T)_obj;
+        }
+
+        // Safer way to use logic that interacts with modules without worrying if module even exists
+        // Example how to use:
+        // ActOnModule<ModuleName>((ModuleName _ref) => {_ref.Hello();});
+        
+        public static void ActOnModule<T>(Action<T> _logic)
+        {
+            T _module = GetLoadedModule<T>();
+
+            if(!ReferenceEquals(_logic, null) && !ReferenceEquals(_module, null))
+                _logic(_module);
         }
     }
 }

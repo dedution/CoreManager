@@ -8,11 +8,10 @@ using static core.GameManager;
 namespace core.gameplay
 {
     [System.Serializable]
-    public struct SaveData
+    public struct ActorsaveData
     {
         public bool Enabled;
         public string GUID;
-        public Dictionary<string, object> Data;
         public void GenerateGUID()
         {
             if (string.IsNullOrWhiteSpace(GUID))
@@ -30,20 +29,17 @@ namespace core.gameplay
         public bool actorUpdatesViaManager = false;
 
         [Header("Save System")]
-        public SaveData saveData = new SaveData();
+        public ActorsaveData saveData = new ActorsaveData();
 
         void Start()
         {
-            // Try to init modules just in case
-            Instance.Init();
+            // Try to init game manager
+            Init();
 
             // Register Actor
-            GetLoadedModule<ActorManager>().RegisterActor(this);
+            ActOnModule((ActorManager _ref) => {_ref.RegisterActor(this);});
 
-            // Load saved data (maybe add a way for a possible reload of actors data)
-            SaveSystem_Load();
-
-            // Initialize
+            // Initialize actor
             onStart();
         }
 
@@ -57,50 +53,31 @@ namespace core.gameplay
             // Use with caution
         }
 
-        // Keep these two functions untouched for now
-        protected void SaveSystem_Load()
-        {
-            GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Get(saveData);
-        }
-
-        protected void SaveSystem_Save()
-        {
-            GetLoadedModule<SaveSystemManager>().SaveSystem_Game_Set(saveData);
-        }
-
         protected T SaveSystem_GetData<T>(string _dataKey, T _defaultData)
         {
-            // Object - Dictionary<string, object>
-            // string is the key for the data that was saved
-            // object is the value so we can have a dictionary of different value types
-            var _data = saveData.Data != null && saveData.Data.ContainsKey(_dataKey) ? saveData.Data[_dataKey] : null;
+            T _data = _defaultData;
 
-            if (_data != null)
-                return (T)_data;
-            else
-                return _defaultData;
+            if (saveData.Enabled)
+                ActOnModule((SaveSystemManager _ref) => { _data = _ref.SaveSystem_GameData_Get(saveData.GUID, _dataKey, _defaultData); });
+
+            return _data;
         }
 
-        protected void SaveSystem_SetData(string _dataKey, object _savedata)
+        protected void SaveSystem_SetData<T>(string _dataKey, T _savedata)
         {
-            if (saveData.Data == null)
-                saveData.Data = new Dictionary<string, object>();
-
-            if (saveData.Data.ContainsKey(_dataKey))
-                saveData.Data[_dataKey] = _savedata;
-            else
-                saveData.Data.Add(_dataKey, _savedata);
-
-            // Save this actor data into the save system
-            SaveSystem_Save();
+            if (saveData.Enabled)
+            {
+                ActOnModule((SaveSystemManager _ref) =>
+                {
+                    _ref.SaveSystem_GameData_Set(saveData.GUID, _dataKey, _savedata);
+                });
+            }
         }
 
         private void Destroy()
         {
-            SaveSystem_Save();
-
             // Unregister Actor
-            GetLoadedModule<ActorManager>().UnregisterActor(this);
+            ActOnModule((ActorManager _ref) => {_ref.UnregisterActor(this);});
 
             onDestroy();
         }

@@ -3,16 +3,89 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using core.gameplay;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Unity.Plastic.Newtonsoft.Json;
+using static core.IOController;
 
 namespace core.modules
 {
+    [System.Serializable]
+    public struct GameSaveData
+    {
+        // Pair of actor persistent id with pairs of data  
+        public SaveDataPairs<string, SaveDataPairs<string, string>> GameData;
+        public SaveDataPairs<string, string> ConfigData;
+
+        public void InitData()
+        {
+            GameData = new SaveDataPairs<string, SaveDataPairs<string, string>>();
+            ConfigData = new SaveDataPairs<string, string>();
+        }
+    }
+
+    [System.Serializable]
+    public class SaveDataPairs<Type, T>
+    {
+        public List<Type> keys;
+        public List<T> values;
+
+        public void AddData(Type _key, T _value)
+        {
+            if(keys == null || values == null)
+            {
+                keys = new List<Type>();
+                values = new List<T>();
+
+                keys.Add(_key);
+                values.Add(_value);
+            }
+            else if(keys.Contains(_key))
+                values[GetKeyID(_key)] = _value;
+            else
+            {
+                keys.Add(_key);
+                values.Add(_value);
+            }
+        }
+
+        public bool ContainsKey(Type _key)
+        {
+            if(keys != null)
+                return keys.Contains(_key);
+            else
+                return false;
+        }
+
+        private int GetKeyID(Type _key)
+        {
+            int id = keys.IndexOf(_key);
+            return id;
+        }
+
+        public T GetData(Type _key, T _defaultData)
+        {
+            if(keys != null && keys.Contains(_key))
+                return values[GetKeyID(_key)];
+            else
+                return _defaultData;
+        }
+
+        public T GetData(Type _key)
+        {
+            return values[GetKeyID(_key)];
+        }
+    }
+
     public class SaveSystemManager : BaseModule
     {
-        private Dictionary<string, object> m_LocalSaveData = new Dictionary<string, object>();
-        private Dictionary<string, string> m_LocalConfigData = new Dictionary<string, string>();
+        public GameSaveData gameSaveData = new GameSaveData();
 
         public override void onInitialize()
         {
+            gameSaveData.InitData();
+
             // Load config data immediately
             SaveSystem_LoadConfigData();
         }
@@ -27,103 +100,80 @@ namespace core.modules
             // Has to be async and have a saving state lockup
 
             // Use the EventManager to trigger this information to the necessary places
-            EventManager.TriggerEvent("SubtitleManager", new Dictionary<string, object> { { "SETTINGS_ALLOWSUBTITLES", SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false) } });
+            //EventManager.TriggerEvent("SubtitleManager", new Dictionary<string, object> { { "SETTINGS_ALLOWSUBTITLES", SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false) } });
         }
 
-        public string SaveSystem_Config_Get(string ID, string _default)
+        public void SaveSystem_GameData_Set<T>(string actorGUID, string key, T data)
         {
-            return m_LocalConfigData.ContainsKey(ID) ? m_LocalConfigData[ID] : _default;
-        }
+            string _dataParse = DataToBinaryString(data);
 
-        public float SaveSystem_Config_Get(string ID, float _default)
-        {
-            return m_LocalConfigData.ContainsKey(ID) ? float.Parse(m_LocalConfigData[ID]) : _default;
-        }
-
-        public int SaveSystem_Config_Get(string ID, int _default)
-        {
-            return m_LocalConfigData.ContainsKey(ID) ? int.Parse(m_LocalConfigData[ID]) : _default;
-        }
-
-        public bool SaveSystem_Config_Get(string ID, bool _default)
-        {
-            return m_LocalConfigData.ContainsKey(ID) ? bool.Parse(m_LocalConfigData[ID]) : _default;
-        }
-
-        public void SaveSystem_Config_Set(string ID, string value)
-        {
-            // Save config immediately data
-            if (m_LocalConfigData.ContainsKey(ID)) m_LocalConfigData[ID] = value;
+            if(gameSaveData.GameData.ContainsKey(actorGUID))
+                gameSaveData.GameData.GetData(actorGUID).AddData(key, _dataParse);
             else
-                m_LocalConfigData.Add(ID, value);
-
-            SaveSystem_SaveConfigData();
+            {
+                gameSaveData.GameData.AddData(actorGUID, new SaveDataPairs<string, string>());
+                gameSaveData.GameData.GetData(actorGUID).AddData(key, _dataParse);
+            }
         }
 
-        public void SaveSystem_Config_Set(string ID, float value)
+        public T SaveSystem_GameData_Get<T>(string actorGUID, string key, T defaultData)
         {
-            // Save config immediately data
-            if (m_LocalConfigData.ContainsKey(ID)) m_LocalConfigData[ID] = value.ToString();
+            string _stringDefaultData = DataToBinaryString(defaultData);
+
+            if(gameSaveData.GameData.ContainsKey(actorGUID))
+            {
+                string _rawdata = gameSaveData.GameData.GetData(actorGUID).GetData(key, _stringDefaultData);
+                return BinaryStringToData<T>(_rawdata);
+            }
             else
-                m_LocalConfigData.Add(ID, value.ToString());
-
-            SaveSystem_SaveConfigData();
-        }
-
-        public void SaveSystem_Config_Set(string ID, int value)
-        {
-            // Save config immediately data
-            if (m_LocalConfigData.ContainsKey(ID)) m_LocalConfigData[ID] = value.ToString();
-            else
-                m_LocalConfigData.Add(ID, value.ToString());
-
-            SaveSystem_SaveConfigData();
-        }
-
-        public void SaveSystem_Config_Set(string ID, bool value)
-        {
-            // Save config immediately data
-            if (m_LocalConfigData.ContainsKey(ID)) m_LocalConfigData[ID] = value.ToString();
-            else
-                m_LocalConfigData.Add(ID, value.ToString());
-
-            SaveSystem_SaveConfigData();
-        }
-
-        public void SaveSystem_Game_Set(SaveData _actor)
-        {
-            if(!_actor.Enabled)
-                return;
-            
-            if(m_LocalSaveData.ContainsKey(_actor.GUID))
-                m_LocalSaveData[_actor.GUID] = _actor.Data;
-            else
-                m_LocalSaveData.Add(_actor.GUID, _actor.Data);
-        }
-
-        public void SaveSystem_Game_Get(SaveData _actor)
-        {
-            if(!_actor.Enabled)
-                return;
-
-            object _data = null; 
-
-            if(m_LocalSaveData.ContainsKey(_actor.GUID))
-                m_LocalSaveData.TryGetValue(_actor.GUID, out _data);
-
-            _actor.Data = _data as Dictionary<string, object>;
+                return defaultData;
         }
 
         public void SaveSystem_Game_Save()
         {
             // Save data to file
             EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", true } });
+
+            string _Path = GetSavePath();
+
+            Debug.Log("Saving data to: " + _Path);
+
+            IOController.WriteDataToFile<GameSaveData>(_Path, gameSaveData, true, true, onSaveDataSuccess);
         }
 
         public void SaveSystem_Game_Load()
         {
             // Load and process data from file
             EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", true } });
+
+            string _Path = GetSavePath();
+
+            Debug.Log("Loading data from: " + _Path);
+
+            IOController.ReadDataFromFile<GameSaveData>(_Path, true, onLoadDataSuccess);
+        }
+
+        private string GetSavePath()
+        {
+            string _Path = Path.Combine(Application.persistentDataPath, "savedata");
+
+            if(!Directory.Exists(_Path))
+                Directory.CreateDirectory(_Path);
+
+            return Path.Combine(_Path, "data.dat");
+        }
+
+        private void onSaveDataSuccess()
+        {
+            Debug.Log("SAVE SUCESSFULL!");
+            EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", false } });
+        }
+
+        private void onLoadDataSuccess(GameSaveData _data)
+        {
+            Debug.Log("LOAD SUCESSFULL!");
+            gameSaveData = _data;
+            EventManager.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", false } });
         }
     }
 }

@@ -19,7 +19,7 @@ namespace core.modules
         public override void onInitialize()
         {
             // Update SETTINGS_ALLOWSUBTITLES through an event with the correct state
-            Subtitle_Enabled = GetLoadedModule<SaveSystemManager>().SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false);
+            //Subtitle_Enabled = GetLoadedModule<SaveSystemManager>().SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false);
             EventManager.StartListening("SubtitleManager", OnSaveSystem);
         }
 

@@ -5,6 +5,7 @@ using core.modules;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using static core.GameManager;
 
 public class CoreTests
 {
@@ -12,7 +13,7 @@ public class CoreTests
     public void BasicCoreManagerTest()
     {
         // Initialize Game Manager
-        GameManager.Instance.Init();
+        Init();
         Assert.Fail();
     }
 }
