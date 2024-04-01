@@ -4,6 +4,8 @@ using System;
 using System.Reflection;
 using core.utils;
 using System.Collections.Generic;
+using static core.GameManager;
+using UnityEngine.InputSystem;
 
 namespace core.modules
 {
@@ -63,7 +65,9 @@ namespace core.modules
             }
 
             set 
-            { 
+            {
+                // Check conditions for pausing the game
+                // if(value)
                 m_isActive = value;
 
                 // Wont this interfere?
@@ -81,7 +85,21 @@ namespace core.modules
         {
             currentMatrix = GUI.matrix;
             LoadDebugMenuStyle();
-            //isActive = true;
+
+            // Attach opening menu logic to action
+            ActOnModule((InputManager _ref) =>
+            {
+                _ref.onActionPressed("Pause", (InputAction.CallbackContext callbackContext) =>
+                {
+                    OpenDebug();
+                });
+            });
+        }
+
+        private void OpenDebug()
+        {
+            // Ask the gamemanager to pause the game
+            isActive = !isActive;
         }
 
         private void LoadDebugMenuStyle()

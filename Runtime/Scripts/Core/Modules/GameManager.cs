@@ -65,13 +65,28 @@ namespace core
 
         // Safer way to use logic that interacts with modules without worrying if module even exists
         // Example how to use:
-        // ActOnModule<ModuleName>((ModuleName _ref) => {_ref.Hello();});
+        // ActOnModule((ModuleName _ref) => {_ref.Hello();});
         public static void ActOnModule<T>(Action<T> _logic)
         {
             T _module = GetLoadedModule<T>();
 
             if(!ReferenceEquals(_logic, null) && !ReferenceEquals(_module, null))
                 _logic(_module);
+        }
+
+        // Returns the state of pause
+        public static bool Game_SetPauseState(bool state)
+        {
+            // Can we pause the game?
+            // Do logic for freezing and unfreezing time
+            // Trigger pause event for whoever is listening
+
+            return Game_GetPauseState();
+        }
+
+        public static bool Game_GetPauseState()
+        {
+            return false;
         }
     }
 }

@@ -14,25 +14,18 @@ namespace core.modules
         // Use a default map inside this package with the default binds\
         // Handle dynamic reconfiguration and loading over default
 
-        private static InputManager _instance = null;
         private PlayerInput m_PlayerInput;
         private InputActionAsset m_DefaultActionAsset;
         private DefaultActionControls _DefaultActions = new DefaultActionControls();
 
         // Action config by platform
-        private Dictionary<string, InputActionAsset> m_InputActionConfigs = new Dictionary<string, InputActionAsset>();
+        // private Dictionary<string, InputActionAsset> m_InputActionConfigs = new Dictionary<string, InputActionAsset>();
 
         // Load buttons by platform as well
 
-        public static bool isBusyLoading = true;
+        public bool isBusyLoading = true;
 
         public InputManager()
-        {
-            if (_instance == null)
-                _instance = this;
-        }
-
-        public override void onInitialize()
         {
             m_PlayerInput = GameManager.CreateBehaviorOnDummy<PlayerInput>();
             m_PlayerInput.notificationBehavior = PlayerNotifications.InvokeUnityEvents;
@@ -43,29 +36,35 @@ namespace core.modules
             isBusyLoading = false;
 
             // Try to load a default Input from Resources
+            // Dont use async cause of other modules dependencies
             LoadActionAssetConfiguration("Input/DefaultInputAsset", "Player");
 
             // Load overrides?
         }
 
-        public static string GetCurrentScheme()
+        public override void onInitialize()
         {
-            return _instance.m_PlayerInput.currentControlScheme;
+            
         }
 
-        public static bool IsUsingGamepad()
+        public string GetCurrentScheme()
         {
-            return _instance.m_PlayerInput.currentControlScheme == "Gamepad";
+            return m_PlayerInput.currentControlScheme;
         }
 
-        public static void LoadActionAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
+        public bool IsUsingGamepad()
+        {
+            return m_PlayerInput.currentControlScheme == "Gamepad";
+        }
+
+        public void LoadActionAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
         {
             // Set the action asset
-            _instance.m_PlayerInput.actions = _asset;
+            m_PlayerInput.actions = _asset;
             SwitchCurrentMap(_currentActionMap);
         }
 
-        public static void LoadActionAssetConfiguration(string _asset, string _currentActionMap = "Player", bool useAsync = false)
+        public void LoadActionAssetConfiguration(string _asset, string _currentActionMap = "Player", bool useAsync = false)
         {
             isBusyLoading = true;
 
@@ -85,7 +84,7 @@ namespace core.modules
             }
         }
 
-        private static IEnumerator LoadActionAsset(string _asset, string _currentActionMap = "Player")
+        private IEnumerator LoadActionAsset(string _asset, string _currentActionMap = "Player")
         {
             ResourceRequest request = Resources.LoadAsync<InputActionAsset>(_asset);
             yield return request;
@@ -98,70 +97,70 @@ namespace core.modules
             isBusyLoading = false;
         }
 
-        public static void SwitchCurrentMap(string _map)
+        public void SwitchCurrentMap(string _map)
         {
             // Set the action asset
-            _instance.m_PlayerInput.SwitchCurrentActionMap(_map);
+            m_PlayerInput.SwitchCurrentActionMap(_map);
         }
 
         /* button was pressed or is held */
-        public static void onActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void onActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
         {
-            _instance.m_PlayerInput.actions[_action].performed += _logicAction;
+            m_PlayerInput.actions[_action].performed += _logicAction;
         }
 
-        public static void UnsubscribeToActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void UnsubscribeToActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
         {
-            _instance.m_PlayerInput.actions[_action].performed -= _logicAction;
+            m_PlayerInput.actions[_action].performed -= _logicAction;
         }
 
         /* button was pressed */
-        public static void onActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void onActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
         {
-            _instance.m_PlayerInput.actions[_action].started += _logicAction;
+            m_PlayerInput.actions[_action].started += _logicAction;
         }
 
         /* button was released */
-        public static void onActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void onActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
         {
-            _instance.m_PlayerInput.actions[_action].canceled += _logicAction;
+            m_PlayerInput.actions[_action].canceled += _logicAction;
         }
 
-        public static void UnsubscribeToActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void UnsubscribeToActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
         {
-            _instance.m_PlayerInput.actions[_action].started -= _logicAction;
+            m_PlayerInput.actions[_action].started -= _logicAction;
         }
 
-        public static void UnsubscribeToActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void UnsubscribeToActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
         {
-            _instance.m_PlayerInput.actions[_action].canceled -= _logicAction;
+            m_PlayerInput.actions[_action].canceled -= _logicAction;
         }
 
-        public static bool IsActionPressed(string _action)
+        public bool IsActionPressed(string _action)
         {
-            return _instance.m_PlayerInput.actions[_action].IsPressed();
+            return m_PlayerInput.actions[_action].IsPressed();
         }
 
-        public static bool IsActionReleased(string _action)
+        public bool IsActionReleased(string _action)
         {
-            return _instance.m_PlayerInput.actions[_action].WasReleasedThisFrame();
+            return m_PlayerInput.actions[_action].WasReleasedThisFrame();
         }
 
-        public static bool IsActionPressedThisFrame(string _action)
+        public bool IsActionPressedThisFrame(string _action)
         {
-            return _instance.m_PlayerInput.actions[_action].WasPressedThisFrame();
+            return m_PlayerInput.actions[_action].WasPressedThisFrame();
         }
 
         // Read direct values from action
-        public static T ReadActionValue<T>(string _action) where T : struct
+        public T ReadActionValue<T>(string _action) where T : struct
         {
-            return _instance.m_PlayerInput.actions[_action].ReadValue<T>();
+            return m_PlayerInput.actions[_action].ReadValue<T>();
         }
 
         // Here for now
-        public static void LimitGamepadToFirst()
+        public void LimitGamepadToFirst()
         {
-            _instance.m_PlayerInput.currentActionMap.devices = new[] { Gamepad.all[0] };
+            m_PlayerInput.currentActionMap.devices = new[] { Gamepad.all[0] };
         }
     }
 }

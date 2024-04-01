@@ -27,7 +27,6 @@ namespace core.modules
         // Controller audio support
         // Implement support for audio occlusion
 
-        private static AudioManager _instance = null;
         private List<AudioSource> AudioSourcePool = new List<AudioSource>();
         private Dictionary<string, AudioClip> LoadedAudioData = new Dictionary<string, AudioClip>();
         private int AudioSourcePoolID = 0;
@@ -36,17 +35,16 @@ namespace core.modules
 
         public AudioManager()
         {
-            if (_instance == null)
-                _instance = this;
-        }
-
-        public override void onInitialize()
-        {
             // Populate pool of audio sources
             PopulatePool();
 
             // Load audio from streaming assets. This data is persistent, load with caution.
             LoadAudioFromAssets();
+        }
+
+        public override void onInitialize()
+        {
+            
         }
 
         private void LoadAudioFromAssets()
@@ -130,53 +128,29 @@ namespace core.modules
                 AudioSourcePoolID = 0;
         }
 
-        public static void ResetAll()
+        public void ResetAll()
         {
-            if(_instance == null)
-            {
-                Debug.LogError("Audio Manager Module wasn't initialized.");
-                return;
-            }
-
             for(int i = 0; i < POOLSIZE; i++)
             {
                 ResetAudio(i);
             }
         }
 
-        public static void ResetAudio(int IDx)
+        public void ResetAudio(int IDx)
         {
-            if(_instance == null)
-            {
-                Debug.LogError("Audio Manager Module wasn't initialized.");
-                return;
-            }
-
-            AudioSource _s = _instance.AudioSourcePool.ElementAt(IDx);
+            AudioSource _s = AudioSourcePool.ElementAt(IDx);
             _s.Stop();
-            _instance.ConfigNewASource(_s);
+            ConfigNewASource(_s);
         }
 
-        public static void ResetAudio(AudioSource _source)
+        public void ResetAudio(AudioSource _source)
         {
-            if(_instance == null)
-            {
-                Debug.LogError("Audio Manager Module wasn't initialized.");
-                return;
-            }
-            
             _source.Stop();
-            _instance.ConfigNewASource(_source);
+            ConfigNewASource(_source);
         }
 
-        public static AudioSource PlayAudio(AudioClip _clip, Vector3 _audioPosition = new Vector3(), bool _isLoop = false)
+        public AudioSource PlayAudio(AudioClip _clip, Vector3 _audioPosition = new Vector3(), bool _isLoop = false)
         {
-            if(_instance == null)
-            {
-                Debug.LogError("Audio Manager Module wasn't initialized.");
-                return null;
-            }
-
             AudioSource _s = GetNextAudio();
             _s.clip = _clip;
             _s.loop = _isLoop;
@@ -186,19 +160,13 @@ namespace core.modules
             return _s;
         }
 
-        public static AudioSource PlayAudio(string _clipID, Vector3 _audioPosition = new Vector3(), bool _isLoop = false)
+        public AudioSource PlayAudio(string _clipID, Vector3 _audioPosition = new Vector3(), bool _isLoop = false)
         {
-            if(_instance == null)
-            {
-                Debug.LogError("Audio Manager Module wasn't initialized.");
-                return null;
-            }
-
-            if(!_instance.LoadedAudioData.ContainsKey(_clipID))
+            if(!LoadedAudioData.ContainsKey(_clipID))
                 return null;
 
             AudioSource _s = GetNextAudio();
-            _s.clip = _instance.LoadedAudioData[_clipID];
+            _s.clip = LoadedAudioData[_clipID];
             _s.loop = _isLoop;
             _s.transform.position = _audioPosition;
             _s.Play();
@@ -206,16 +174,10 @@ namespace core.modules
             return _s;
         }
 
-        public static AudioSource GetNextAudio()
+        public AudioSource GetNextAudio()
         {
-            if(_instance == null)
-            {
-                Debug.LogError("Audio Manager Module wasn't initialized.");
-                return null;
-            }
-
-            AudioSource _s = _instance.AudioSourcePool.ElementAt(_instance.AudioSourcePoolID);
-            _instance.MoveNextPool();
+            AudioSource _s = AudioSourcePool.ElementAt(AudioSourcePoolID);
+            MoveNextPool();
             return _s;
         }
     }

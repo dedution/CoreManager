@@ -71,9 +71,6 @@ namespace core
                 coreDummyObject.unity_UpdateDelegate += _module.UpdateModule;
 
                 _module.MonoObject = coreDummyObject;
-
-                if(!isConfigurationLoaded)
-                    _module.onInitialize();
             }
 
             // Initialization by order of config
@@ -86,9 +83,24 @@ namespace core
                 }
             }
             else if(useJSONAutoSave)
+            {
                 SaveCurrentConfig();
+                InitAllModules();
+            }
+            else
+                InitAllModules();
 
             Debug.Log("# Modules Loaded! (" + activeModules.Count + ")");
+        }
+
+        private void InitAllModules()
+        {
+            // Initialize all modules loaded
+            // This is only called when no default configuration is read from file
+            foreach(var _module in activeModules.Values)
+            {
+                _module.onInitialize();
+            }
         }
 
         public T FindModule<T>()
