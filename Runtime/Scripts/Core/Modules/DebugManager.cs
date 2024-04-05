@@ -106,9 +106,11 @@ namespace core.modules
         {
             // Loads the style json and parse it to draw the debug menu
             menuLayout = new MenuLayout();
-            var newArea = new MenuArea();
-            newArea.areaRect = new Rect(0, 0, 400, 600);
-            newArea.areaName = "";
+            var newArea = new MenuArea
+            {
+                areaRect = new Rect(0, 0, 400, 600),
+                areaName = ""
+            };
             newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Box, "Test Box"));
             newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Space, "5"));
             newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Box, "Test Box 2"));
