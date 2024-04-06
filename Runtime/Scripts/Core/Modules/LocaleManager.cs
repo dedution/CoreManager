@@ -67,7 +67,7 @@ namespace core.modules
             }
 
             // Load data in coroutine
-            MonoObject.StartCoroutine(LoadLocalizationData(path));
+            GameManager.RunCoroutine(LoadLocalizationData(path));
         }
 
         public string Locale_GetLocale(string _symbol)

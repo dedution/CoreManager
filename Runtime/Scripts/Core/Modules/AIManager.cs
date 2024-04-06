@@ -18,7 +18,7 @@ namespace core.modules
     {
         //private Queue<object> AICalculationQueue = new Queue<object>();
         
-        // Timeout when task is waiting some process to finish
+        // Timeout when task is waiting some process to finish (in milliseconds)
         private const int TASKDELAYTIMEOUT = 10;
 
         // Number of tasks running simultaneously

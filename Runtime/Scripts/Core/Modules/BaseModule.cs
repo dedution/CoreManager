@@ -6,8 +6,6 @@ namespace core.modules
 {
     public abstract class BaseModule
     {
-        public CoreDummyObject MonoObject { get; set; }
-
         public BaseModule()
         {
         }
@@ -19,12 +17,10 @@ namespace core.modules
 
         public virtual void onInitialize()
         {
-            //Debug.Log("Initialization method from module is not configured ( " + GetType().ToString() + ")");
         }
 
         public virtual void UpdateModule()
-        {
-            
+        {   
         }
 
         public virtual void OnGUI()
@@ -33,7 +29,7 @@ namespace core.modules
 
         public void Hello()
         {
-            
+            // Test function for debugging
         }
     }
 }

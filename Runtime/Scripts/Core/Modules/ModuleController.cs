@@ -66,11 +66,9 @@ namespace core
             {
                 activeModules.Add(_module.Module_GetType(), _module);
 
-                //Register unity calls to delegates
+                // Register unity calls to delegates
                 coreDummyObject.unity_GUIDelegate += _module.OnGUI;
                 coreDummyObject.unity_UpdateDelegate += _module.UpdateModule;
-
-                _module.MonoObject = coreDummyObject;
             }
 
             // Initialization by order of config
