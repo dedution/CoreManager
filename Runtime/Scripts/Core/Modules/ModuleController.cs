@@ -62,7 +62,7 @@ namespace core
         public void Init(CoreDummyObject coreDummyObject)
         {
             // Initialize modules
-            foreach (BaseModule _module in InstantiateModules<BaseModule>(coreDummyObject))
+            foreach (BaseModule _module in InstantiateModules<BaseModule>())
             {
                 activeModules.Add(_module.Module_GetType(), _module);
 
@@ -114,20 +114,20 @@ namespace core
             return (T)Convert.ChangeType(_obj, _type);
         }
 
-        private List<Type> SearchTypeInNamespace(object instance)
+        private List<Type> SearchTypeInNamespace(Type _type)
         {
-            string ns = instance.GetType().Namespace;
-            Type instanceType = instance.GetType();
-            List<Type> results = instance.GetType().Assembly.GetTypes().Where(tt => tt.Namespace == ns &&
+            string ns = _type.Namespace;
+            Type instanceType = _type;
+            List<Type> results = _type.Assembly.GetTypes().Where(tt => tt.Namespace == ns &&
                                                                               tt != instanceType).ToList();
             return results;
         }
 
-        private List<T> InstantiateModules<T>(object instance)
+        private List<T> InstantiateModules<T>()
         {
             List<T> instances = new List<T>();
 
-            foreach (Type t in SearchTypeInNamespace(instance))
+            foreach (Type t in SearchTypeInNamespace(typeof(T)))
             {
                 if (t.IsSubclassOf(typeof(T)))
                 {
