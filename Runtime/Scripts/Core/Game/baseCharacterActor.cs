@@ -5,6 +5,8 @@ using System.Linq;
 using core.AI;
 using core.modules;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.TextCore.Text;
 using static core.GameManager;
 
 namespace core.gameplay
@@ -12,10 +14,20 @@ namespace core.gameplay
     // Common logic for enemy and friendly NPCs
     // State machine brain should be defined here
     // Implement active ragdoll support with a separate controller or behavior
+    // Separate the ragdoll control into its own component
     // Path finding should be over time and async
+    // Implement a dialog system with callbacks for each reply and easy implementation
+    // The dialog system should also support conversations with other characters
+    // Do analysis on implementing a dialog tree system on a grid
+    // Implement a pathway system so characters can follow looping and closed paths
 
     public abstract class baseCharacterActor : baseGameActor
     {
+        // AI Common components
+        private NavMeshAgent characterAgent;
+        private Animator characterAnimator;
+        private CharacterController characterController;
+
         public Dictionary<string, State<baseCharacterActor>> m_characterStates;
         protected AIStateMachine<baseCharacterActor> AIStateManager { get; set; }
 
@@ -33,7 +45,26 @@ namespace core.gameplay
         {
             base.onUpdate();
 
+            // Most of the character logic will be inside separate states
             AIStateManager.Update();
+        }
+
+        private void RequestPathFinding()
+        {
+
+        }
+
+        private void CalculateLookAt(Transform target)
+        {
+
+        }
+
+        private void HandleMovement()
+        {
+            // TODO
+            // Add arguments to control what kind of movement this character should do
+            // Some characters stand still in the same place and just turn to face the player
+            // Other characters follow pathways and others even walk around talking with other characters
         }
 
         private string GetStatePrefix()
