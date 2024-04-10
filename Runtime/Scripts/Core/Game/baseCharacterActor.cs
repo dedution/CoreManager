@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using core.AI;
 using core.modules;
 using UnityEngine;
@@ -75,12 +76,8 @@ namespace core.gameplay
 
         private void FindAndCreateStates()
         {
-            // Find an automatic way of finding the states and instantiate them
-            // Use the character class name as reference
-            // Find all the states under a specific namespace
             // State classes need to be formated as follows: 
             // CharName_State_StateName
-            // StateName will be the identifier for the state in the dictionary
             
             ActOnModule((AIManager _ref) => {
                 m_characterStates = _ref.GetRegisteredAIStates(this);
@@ -95,24 +92,21 @@ namespace core.gameplay
                 // Reformat state class name to simplify it
                 string stateName = _state.GetType().Name;
                 stateName = stateName.Replace(GetStatePrefix(), "");
-
                 m_characterStates.Add(stateName, _state);
             }
 
             ActOnModule((AIManager _ref) => {
                 _ref.RegisterAIStates(this);
             });
-
-            // Log states
-            if(m_characterStates.Count > 0)
-                Debug.Log("AI loaded " + m_characterStates.Count + " states");
         }
 
         private List<Type> FindStatesInNamespace<T>()
         {
             string ns = typeof(T).Namespace;
             Type instanceType = typeof(T);
-            List<Type> results = instanceType.Assembly.GetTypes().Where(tt => tt.Namespace == ns &&
+            
+            // Find types in the same assembly as self  
+            List<Type> results = GetType().Assembly.GetTypes().Where(tt => tt.Namespace == ns &&
                                                                               tt != instanceType).ToList();
             return results;
         }
@@ -125,8 +119,8 @@ namespace core.gameplay
             {
                 if (t.IsSubclassOf(typeof(T)))
                 {
-                    // Only instantiate states for the current character
-                    if(!typeof(T).Name.Contains(GetStatePrefix()))
+                    // Only instantiate states for the current character 
+                    if(!t.Name.Contains(GetStatePrefix()))
                         continue;
 
                     T i = (T)Activator.CreateInstance(t);

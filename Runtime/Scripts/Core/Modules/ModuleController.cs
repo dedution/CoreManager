@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using core.modules;
 using UnityEngine;
 using static core.GameManager;
@@ -35,7 +36,7 @@ namespace core
             MODULECONFIGPATH = Path.Combine(Application.streamingAssetsPath, "modules");
 
             // Create streaming assets if missing
-            if(!Directory.Exists(MODULECONFIGPATH))
+            if (!Directory.Exists(MODULECONFIGPATH))
                 Directory.CreateDirectory(MODULECONFIGPATH);
 
             string _modulePath = Path.Combine(MODULECONFIGPATH, CONFIGFILENAME);
@@ -46,10 +47,10 @@ namespace core
         {
             string _modulePath = Path.Combine(MODULECONFIGPATH, CONFIGFILENAME);
 
-            foreach(Type _type in activeModules.Keys)
+            foreach (Type _type in activeModules.Keys)
                 ModulesConfiguration.Modules.Add(_type.ToString());
-            
-            if(!File.Exists(_modulePath))
+
+            if (!File.Exists(_modulePath))
                 IOController.WriteJSONToFile<ModuleConfig>(_modulePath, ModulesConfiguration, true, false);
         }
 
@@ -77,10 +78,10 @@ namespace core
                 foreach (string _typeString in ModulesConfiguration.Modules)
                 {
                     var _module = activeModules[Type.GetType(_typeString)];
-                    _module.onInitialize();                    
+                    _module.onInitialize();
                 }
             }
-            else if(useJSONAutoSave)
+            else if (useJSONAutoSave)
             {
                 SaveCurrentConfig();
                 InitAllModules();
@@ -88,14 +89,14 @@ namespace core
             else
                 InitAllModules();
 
-            Debug.Log("# Modules Loaded! (" + activeModules.Count + ")");
+            Debug.Log(">> Modules Loaded! (" + activeModules.Count + ")");
         }
 
         private void InitAllModules()
         {
             // Initialize all modules loaded
             // This is only called when no default configuration is read from file
-            foreach(var _module in activeModules.Values)
+            foreach (var _module in activeModules.Values)
             {
                 _module.onInitialize();
             }
@@ -106,7 +107,8 @@ namespace core
             var _type = typeof(T);
             var _obj = activeModules[_type];
 
-            if(ReferenceEquals(_obj, null)) {
+            if (ReferenceEquals(_obj, null))
+            {
                 Debug.LogError("Couldn't find loaded module: " + _type);
                 return default(T);
             }
@@ -114,12 +116,16 @@ namespace core
             return (T)Convert.ChangeType(_obj, _type);
         }
 
-        private List<Type> SearchTypeInNamespace(Type _type)
+        private List<Type> SearchTypeInNamespace<T>()
         {
-            string ns = _type.Namespace;
-            Type instanceType = _type;
-            List<Type> results = _type.Assembly.GetTypes().Where(tt => tt.Namespace == ns &&
-                                                                              tt != instanceType).ToList();
+            string ns = typeof(T).Namespace;
+            List<Type> results = new List<Type>();
+            
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                results.AddRange(a.GetTypes().Where(tt => tt.Namespace == ns && tt != typeof(T)).ToList());
+            }
+
             return results;
         }
 
@@ -127,16 +133,14 @@ namespace core
         {
             List<T> instances = new List<T>();
 
-            foreach (Type t in SearchTypeInNamespace(typeof(T)))
+            foreach (Type moduleType in SearchTypeInNamespace<T>())
             {
-                if (t.IsSubclassOf(typeof(T)))
+                if (moduleType.IsSubclassOf(typeof(T)))
                 {
-                    if(isConfigurationLoaded && !ModulesConfiguration.Modules.Contains(t.ToString()))
-                    {
-                        Debug.LogWarning("# Skipping load of module: " + t.ToString());
+                    if (isConfigurationLoaded && !ModulesConfiguration.Modules.Contains(moduleType.ToString()))
                         continue;
-                    }
-                    T i = (T)Activator.CreateInstance(t);
+
+                    T i = (T)Activator.CreateInstance(moduleType);
                     instances.Add(i);
                 }
             }
