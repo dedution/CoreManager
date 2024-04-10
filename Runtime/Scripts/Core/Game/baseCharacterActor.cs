@@ -21,16 +21,28 @@ namespace core.gameplay
     // The dialog system should also support conversations with other characters
     // Do analysis on implementing a dialog tree system on a grid
     // Implement a pathway system so characters can follow looping and closed paths
+    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(NavMeshAgent))]
+    [RequireComponent(typeof(Animator))]
 
     public abstract class baseCharacterActor : baseGameActor
     {
         // AI Common components
-        private NavMeshAgent characterAgent;
-        private Animator characterAnimator;
-        private CharacterController characterController;
-
+        [Header("Component references")]
+        public NavMeshAgent characterAgent;
+        public Animator characterAnimator;
+        public CharacterController characterController;
+        
+        // This dictionary needs to be private
         public Dictionary<string, State<baseCharacterActor>> m_characterStates;
         protected AIStateMachine<baseCharacterActor> AIStateManager { get; set; }
+
+        void Reset()
+        {
+            characterAgent = GetComponent<NavMeshAgent>();
+            characterAnimator = GetComponent<Animator>();
+            characterController = GetComponent<CharacterController>();
+        }
 
         protected override void onStart()
         {
