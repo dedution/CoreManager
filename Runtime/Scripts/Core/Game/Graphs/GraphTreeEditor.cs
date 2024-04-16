@@ -7,7 +7,7 @@ public class GraphTreeEditor : EditorWindow
     [SerializeField]
     private VisualTreeAsset m_VisualTreeAsset = default;
 
-    [MenuItem("Window/UI Toolkit/GraphTreeEditor")]
+    [MenuItem("Window/Graphs/AI Behavior Editor")]
     public static void ShowExample()
     {
         GraphTreeEditor wnd = GetWindow<GraphTreeEditor>();
@@ -19,12 +19,7 @@ public class GraphTreeEditor : EditorWindow
         // Each editor window contains a root VisualElement object
         VisualElement root = rootVisualElement;
 
-        // VisualElements objects can contain other VisualElement following a tree hierarchy.
-        VisualElement label = new Label("Hello World! From C#");
-        root.Add(label);
-
         // Instantiate UXML
-        VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
-        root.Add(labelFromUXML);
+        m_VisualTreeAsset.CloneTree(root);
     }
 }

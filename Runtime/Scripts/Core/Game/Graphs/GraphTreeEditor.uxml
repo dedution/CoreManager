@@ -1,12 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<engine:UXML
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:engine="UnityEngine.UIElements"
-    xmlns:editor="UnityEditor.UIElements"
-    xsi:noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd"
->
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Assets/CoreManager/Runtime/Scripts/Core/Game/Graphs/GraphTreeEditor.uss?fileID=7433441132597879392&amp;guid=7bdfd9aa08dc84106bd74a9d72cda4cb&amp;type=3#GraphTreeEditor" />
-	<engine:Label text="Hello World! From UXML" />
-	<engine:Label class="custom-label" text="Hello World! With Style" />
-
-</engine:UXML>
+    <GraphTreeView focusable="true" name="GraphTreeView" style="flex-grow: 1;" />
+</ui:UXML>
