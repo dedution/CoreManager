@@ -1,18 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using core.graphs;
 using UnityEngine;
 
-public class NodeView : MonoBehaviour
+public class NodeView : UnityEditor.Experimental.GraphView.Node
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Node node;
 
-    // Update is called once per frame
-    void Update()
+    public NodeView(Node node)
     {
-        
+        this.node = node;
+        this.title = node.name;
     }
 }

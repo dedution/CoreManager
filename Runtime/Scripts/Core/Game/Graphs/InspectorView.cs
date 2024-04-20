@@ -1,18 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class InspectorView : MonoBehaviour
+public class InspectorView : VisualElement
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+    public new class UxmlFactory : UxmlFactory<InspectorView, VisualElement.UxmlTraits> { } 
+    
+    public InspectorView() {
         
     }
 }

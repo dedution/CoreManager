@@ -1,4 +1,16 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Assets/CoreManager/Runtime/Scripts/Core/Game/Graphs/GraphTreeEditor.uss?fileID=7433441132597879392&amp;guid=7bdfd9aa08dc84106bd74a9d72cda4cb&amp;type=3#GraphTreeEditor" />
-    <GraphTreeView focusable="true" name="GraphTreeView" style="flex-grow: 1;" />
+    <uie:Toolbar>
+        <uie:ToolbarMenu tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" text="Assets" />
+    </uie:Toolbar>
+    <SplitView fixed-pane-initial-dimension="300">
+        <ui:VisualElement name="left-panel" style="flex-grow: 1;">
+            <InspectorView />
+            <ui:Label tabindex="-1" text="Inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" style="background-color: rgba(32, 32, 32, 0);" />
+        </ui:VisualElement>
+        <ui:VisualElement name="right-panel" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" style="background-color: rgba(36, 36, 36, 0);" />
+            <GraphTreeView focusable="true" name="GraphTreeView" style="flex-grow: 1;" />
+        </ui:VisualElement>
+    </SplitView>
 </ui:UXML>
