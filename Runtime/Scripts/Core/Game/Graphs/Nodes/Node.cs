@@ -16,6 +16,7 @@ namespace core.graphs
         public State state = State.Running;
         public bool started = false;
         public string guid;
+        public Vector2 position;
 
         public State Update()
         {

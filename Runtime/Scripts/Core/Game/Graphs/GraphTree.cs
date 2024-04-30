@@ -40,5 +40,60 @@ namespace core.graphs
             AssetDatabase.RemoveObjectFromAsset(node);
             AssetDatabase.SaveAssets();
         }
+
+        public void AddChild(Node parentNode, Node childNode)
+        {
+            DecoratorNode decorator = parentNode as DecoratorNode;
+
+            if(decorator != null)
+            {
+                decorator.child = childNode;
+            }
+
+            CompositeNode composite = parentNode as CompositeNode;
+
+            if(composite != null)
+            {
+                composite.children.Add(childNode);
+            }
+        }
+
+        public void RemoveChild(Node parentNode, Node childNode)
+        {
+            DecoratorNode decorator = parentNode as DecoratorNode;
+
+            if(decorator != null)
+            {
+                decorator.child = null;
+            }
+
+            CompositeNode composite = parentNode as CompositeNode;
+
+            if(composite != null)
+            {
+                composite.children.Remove(childNode);
+            }
+        }
+
+        public List<Node> GetChildren(Node parentNode)
+        {
+            List<Node> nodes = new List<Node>();
+
+            DecoratorNode decorator = parentNode as DecoratorNode;
+
+            if(decorator != null && decorator.child != null)
+            {
+                nodes.Add(decorator.child);
+            }
+
+            CompositeNode composite = parentNode as CompositeNode;
+
+            if(composite != null)
+            {
+                nodes.AddRange(composite.children);
+            }
+
+            return nodes;
+        }
     }
 }

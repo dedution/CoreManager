@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using core.graphs;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -32,6 +33,8 @@ public class GraphTreeView : GraphView
 
     public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
     {
+        // Maybe append an action for node deletion
+        // and other node contextual
         {
             var types = TypeCache.GetTypesDerivedFrom<ActionNode>();
             foreach (var type in types)
@@ -57,18 +60,58 @@ public class GraphTreeView : GraphView
         }
     }
 
+    private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChanged)
+    {
+        if(graphViewChanged.elementsToRemove != null)
+        {
+            graphViewChanged.elementsToRemove.ForEach(elem => {
+                NodeView node = elem as NodeView;
+
+                if(node != null)
+                    tree.DeleteNode(node.node);
+
+
+                Edge edge = elem as Edge;
+
+                if(edge != null)
+                {
+                    NodeView parentView = edge.output.node as NodeView;
+                    NodeView childView = edge.input.node as NodeView;
+                    tree.RemoveChild(parentView.node, childView.node);
+                }
+            });
+        }
+
+        if(graphViewChanged.edgesToCreate != null)
+        {
+            graphViewChanged.edgesToCreate.ForEach(elem => {
+                NodeView parentView = elem.output.node as NodeView;
+                NodeView childView = elem.input.node as NodeView;
+
+                tree.AddChild(parentView.node, childView.node);
+            });
+        }
+
+        return graphViewChanged;
+    }
+    public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+    {
+        return ports.ToList().Where(endport => endport.direction != startPort.direction && endport.node != startPort.node).ToList();
+    }
+
     private void CreateNode(Type type)
     {
         core.graphs.Node node = tree.CreateNode(type);
         CreateNodeView(node);
     }
-
-
+    
     public void PopulateView(GraphTree tree)
     {
         this.tree = tree;
-        DeleteElements(graphElements);
-
+        
+        graphViewChanged -= OnGraphViewChanged;
+        DeleteElements(graphElements); 
+        graphViewChanged += OnGraphViewChanged;
         tree.nodes.ForEach(n => CreateNodeView(n));
     }
 
