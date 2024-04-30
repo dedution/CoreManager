@@ -80,7 +80,7 @@ namespace core.gameplay
             // Other characters follow pathways and others even walk around talking with other characters
         }
 
-        private string GetStatePrefix()
+        protected virtual string GetStatePrefix()
         {
             // Prefix should be able to be a custom string
             return GetType().Name + "_State_";
