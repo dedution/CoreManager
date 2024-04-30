@@ -43,6 +43,13 @@ namespace core.graphs
 
         public void AddChild(Node parentNode, Node childNode)
         {
+            RootNode root = parentNode as RootNode;
+
+            if(root != null)
+            {
+                root.child = childNode;
+            }
+
             DecoratorNode decorator = parentNode as DecoratorNode;
 
             if(decorator != null)
@@ -60,6 +67,13 @@ namespace core.graphs
 
         public void RemoveChild(Node parentNode, Node childNode)
         {
+            RootNode root = parentNode as RootNode;
+
+            if(root != null)
+            {
+                root.child = null;
+            }
+
             DecoratorNode decorator = parentNode as DecoratorNode;
 
             if(decorator != null)
@@ -78,6 +92,13 @@ namespace core.graphs
         public List<Node> GetChildren(Node parentNode)
         {
             List<Node> nodes = new List<Node>();
+            
+            RootNode root = parentNode as RootNode;
+
+            if(root != null && root.child != null)
+            {
+                nodes.Add(root.child);
+            }
 
             DecoratorNode decorator = parentNode as DecoratorNode;
 

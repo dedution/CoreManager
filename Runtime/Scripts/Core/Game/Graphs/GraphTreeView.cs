@@ -112,12 +112,40 @@ public class GraphTreeView : GraphView
         graphViewChanged -= OnGraphViewChanged;
         DeleteElements(graphElements); 
         graphViewChanged += OnGraphViewChanged;
+
+        if(tree.rootNode == null)
+        {
+            tree.rootNode = tree.CreateNode(typeof(RootNode)) as RootNode;
+            EditorUtility.SetDirty(tree);
+            AssetDatabase.SaveAssets();
+        }
+
+        // Populate nodes
         tree.nodes.ForEach(n => CreateNodeView(n));
+
+        // Populate edges
+        tree.nodes.ForEach(n => {
+            var children = tree.GetChildren(n);
+            children.ForEach(c => {
+                NodeView parent = FindNodeview(n);
+                NodeView child = FindNodeview(c);
+
+                Edge edge = parent.output.ConnectTo(child.input);
+                AddElement(edge);
+
+            });
+        });
+
     }
 
     private void CreateNodeView(core.graphs.Node node)
     {
         NodeView nodeView = new NodeView(node);
         AddElement(nodeView);
+    }
+
+    private NodeView FindNodeview(core.graphs.Node node) 
+    {
+        return GetNodeByGuid(node.guid) as NodeView;
     }
 }

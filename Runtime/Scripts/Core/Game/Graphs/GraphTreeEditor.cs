@@ -35,7 +35,7 @@ public class GraphTreeEditor : EditorWindow
     private void OnSelectionChange() {
         GraphTree tree = Selection.activeObject as GraphTree;
 
-        if(tree)
+        if(tree && AssetDatabase.CanOpenAssetInEditor(tree.GetInstanceID()))
         {
             treeView.PopulateView(tree);
         }

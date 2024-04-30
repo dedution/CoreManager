@@ -25,7 +25,7 @@ public class NodeView : UnityEditor.Experimental.GraphView.Node
 
     private void CreateInputPorts()
     {
-        if(node is ActionNode)
+        if(node is ActionNode || node is CompositeNode || node is DecoratorNode)
         {
             input = InstantiatePort(UnityEditor.Experimental.GraphView.Orientation.Horizontal, 
             UnityEditor.Experimental.GraphView.Direction.Input, UnityEditor.Experimental.GraphView.Port.Capacity.Single, typeof(bool));
@@ -41,6 +41,17 @@ public class NodeView : UnityEditor.Experimental.GraphView.Node
 
     private void CreateOutputPorts()
     {
+        if(node is CompositeNode)
+        {
+            output = InstantiatePort(UnityEditor.Experimental.GraphView.Orientation.Horizontal, 
+            UnityEditor.Experimental.GraphView.Direction.Output, UnityEditor.Experimental.GraphView.Port.Capacity.Multi, typeof(bool));
+        }
+        else if(node is DecoratorNode || node is RootNode)
+        {
+            output = InstantiatePort(UnityEditor.Experimental.GraphView.Orientation.Horizontal, 
+            UnityEditor.Experimental.GraphView.Direction.Output, UnityEditor.Experimental.GraphView.Port.Capacity.Single, typeof(bool));
+        }
+
         if(output != null)
         {
             // Naming ports?
