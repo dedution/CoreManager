@@ -6,6 +6,7 @@ using core.utils;
 using System.Collections.Generic;
 using static core.GameManager;
 using UnityEngine.InputSystem;
+using System.Linq;
 
 namespace core.modules
 {
@@ -21,41 +22,254 @@ namespace core.modules
         public List<MenuProperty> areaProperties = new List<MenuProperty>();
     }
 
-    public enum LayoutMenuProperties
+    public class MenuProperty_ScrollView : MenuProperty
     {
-        Label,
-        Box,
-        Space,
-        Toggle
-    }
+        private bool isStart = false;
+        private GUILayoutOption gUILayoutOption1;
+        private GUILayoutOption gUILayoutOption2;
+        private Vector2 scrollPosition;
 
-    public class MenuProperty
-    {
-        public MenuProperty(LayoutMenuProperties menuProperty, string _value)
+        bool MenuProperty.isSelectable { get { return false; }}
+
+        public MenuProperty_ScrollView(bool isStart, GUILayoutOption gUILayoutOption1, GUILayoutOption gUILayoutOption2)
         {
-            this.menuProperty = menuProperty;
-            this._value = _value;
+            this.isStart = isStart;
+            this.gUILayoutOption1 = gUILayoutOption1;
+            this.gUILayoutOption2 = gUILayoutOption2;
         }
 
-        public LayoutMenuProperties menuProperty = LayoutMenuProperties.Label;
-        public string _value;
+        public MenuProperty_ScrollView(bool isStart)
+        {
+            this.isStart = isStart;
+        }
+
+        public void RunProperty()
+        {
+            if(isStart)
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, gUILayoutOption1, gUILayoutOption2);
+            else
+                GUILayout.EndScrollView();
+        }
+    }
+
+    public class MenuProperty_Box : MenuProperty
+    {
+        string _data = "";
+        bool MenuProperty.isSelectable { get { return false; }}
+        
+        public MenuProperty_Box(string _customData)
+        {
+            _data = _customData;
+        }
+
+        public void RunProperty()
+        {
+            GUILayout.Box(_data);
+        }
+    }
+
+    public class MenuProperty_Horizontal : MenuProperty
+    {
+        bool isStart = false;
+        bool MenuProperty.isSelectable { get { return false; }}
+        
+        public MenuProperty_Horizontal(bool isStart)
+        {
+            this.isStart = isStart;
+        }
+
+        public void RunProperty()
+        {
+            if(isStart)
+                GUILayout.BeginHorizontal();
+            else
+                GUILayout.EndHorizontal();
+        }
+    }
+
+    public class MenuProperty_Toggle: MenuProperty
+    {
+        bool val = false;
+        string label = "";
+
+        public Action<bool> OnUpdate;
+        bool MenuProperty.isSelectable { get { return false; }}
+        
+        public MenuProperty_Toggle(bool val, string label, Action<bool> OnUpdate)
+        {
+            this.val = val;
+            this.label = label;
+            this.OnUpdate = OnUpdate;
+        }
+
+        public void RunProperty()
+        {
+            val = GUILayout.Toggle(val, label);
+            OnUpdate.Invoke(val);
+        }
+    }
+
+    public class MenuProperty_Space : MenuProperty
+    {
+        float _data = 0f;
+        bool MenuProperty.isSelectable { get { return false; }}
+        
+        public MenuProperty_Space(float _customData)
+        {
+            _data = _customData;
+        }
+
+        public void RunProperty()
+        {
+            GUILayout.Space(_data);
+        }
+    }
+
+    public class MenuProperty_Label : MenuProperty
+    {
+        string _data = "";
+
+        string _selector = "";
+
+        string _style = "";
+
+        float timer = 0f;
+        bool timerDir = false;
+
+        Color color = Color.white;
+        bool MenuProperty.isSelectable { get { return true; }}
+
+        public GUILayoutOption GUILayoutOption { get; }
+
+        public MenuProperty_Label(string _customData)
+        {
+            _data = _customData;
+        }
+
+        public MenuProperty_Label(string _customData, Color color)
+        {
+            _data = _customData;
+            
+            if(color != null)
+                this.color = color;
+        }
+
+        public MenuProperty_Label(string _customData, GUILayoutOption gUILayoutOption, Color color, string style = "") : this(_customData)
+        {
+            _data = _customData;
+            GUILayoutOption = gUILayoutOption;
+            _style = style;
+
+            if(color != null)
+                this.color = color;
+        }
+
+        public void RunProperty()
+        {
+            GUIStyle _style = new GUIStyle();
+            _style.wordWrap = false;
+            _style.normal.textColor = color;
+
+            GUIStyle _styleSelector = new GUIStyle();
+            _styleSelector.wordWrap = false;
+            _styleSelector.normal.textColor = Color.yellow;
+            _styleSelector.fontStyle = FontStyle.Bold;
+
+            GUILayout.BeginHorizontal();
+            {
+                string finaldata = (_selector.Length > 0 ? "         " : "") + _data;
+                GUILayout.Label(finaldata, _style, GUILayout.ExpandWidth(false));
+                Rect _rect = GUILayoutUtility.GetLastRect();
+                _rect.xMin += timer * 10f;
+
+                GUI.Label(_rect, _selector, _styleSelector);
+            }
+            
+            GUILayout.EndHorizontal();
+        }
+
+        public void ShowSelector()
+        {
+            _selector = ">>";
+
+            if(timerDir)
+                timer -= Time.deltaTime * 2f;
+            else
+                timer += Time.deltaTime * 2f;
+
+            if(timer > 1f)
+            {
+                timerDir = true;
+            }
+            else if(timer < 0f)
+            {
+                timerDir = false;
+            }
+        }
+
+        public void ClearSelector()
+        {
+            _selector = "";
+        }
+    }
+
+    public class MenuProperty_Slider : MenuProperty
+    {
+        public float currentValue { get; set;}
+        public float minValue { get; }
+        public float maxValue { get; }
+        bool MenuProperty.isSelectable { get { return false; }}
+
+        public Action<float> OnUpdate;
+
+        public MenuProperty_Slider(float currentValue, float minValue, float maxValue, Action<float> OnUpdate)
+        {
+            this.currentValue = currentValue;
+            this.minValue = minValue;
+            this.maxValue = maxValue;
+            this.OnUpdate = OnUpdate;
+        }
+
+        public void RunProperty()
+        {
+            currentValue = GUILayout.HorizontalSlider(currentValue, minValue, maxValue);
+            OnUpdate.Invoke(currentValue);
+        }
+    }
+
+    public interface MenuProperty
+    {
+        bool isSelectable { get;}
+
+        public void RunProperty()
+        {
+            // Run logic 
+        }
+
+        public void ShowSelector()
+        {
+
+        }
+
+        public void ClearSelector()
+        {
+
+        }
     }
 
     public class DebugManager : BaseModule
     {
         // TODO
         // Load layout and submenus from json file (load a default one from this package, or ignore and load one from the game logic if it exists)
-        // Build the entire layout only once
-        // Find a dynamic way to execute logic from the layout. Try to make this module as dynamic and reusable as possible
-        // (ex. button has a string callback for "GameManager.NeedThisCall" and Debug Manager needs to parse that callback)
-        // careful with callbacks for classes in inaccessible namespaces?
+        // Separate classes and interfaces into a new source file and namespace
+        // Slides and toggle needs an updating function that is called every time the menu is opened. this update needs to come from a delegate 
 
-        /* public bool fullscreenBool = false;
-        private Vector2 scrollPosition; */
         private Matrix4x4 currentMatrix;
         private bool m_isActive = false;
 
         private MenuLayout menuLayout;
+
+        private int propertySelectionIndex = 0;
 
         public bool isActive
         {
@@ -106,15 +320,30 @@ namespace core.modules
         {
             // Loads the style json and parse it to draw the debug menu
             menuLayout = new MenuLayout();
+            List<MenuProperty> _areaProperties = new List<MenuProperty>();
+            _areaProperties.Add(new MenuProperty_Space(30));
+            _areaProperties.Add(new MenuProperty_Box("Settings")); // Categories
+            
+            _areaProperties.Add(new MenuProperty_Label("Option Number one!"));
+
+            _areaProperties.Add(new MenuProperty_Space(10));
+            _areaProperties.Add(new MenuProperty_Box("Sound"));  // Categories
+
+            _areaProperties.Add(new MenuProperty_Label("Option Number two!"));
+
+            _areaProperties.Add(new MenuProperty_Space(50));
+            _areaProperties.Add(new MenuProperty_Label("______________________________________________", Color.red));
+            _areaProperties.Add(new MenuProperty_Space(5));
+            _areaProperties.Add(new MenuProperty_Label("BUILD ID: XXXXXXX", Color.red));
+            _areaProperties.Add(new MenuProperty_Label("BUILD DATE: 01-01-0101", Color.red));
+
             var newArea = new MenuArea
             {
-                areaRect = new Rect(0, 0, 400, 600),
-                areaName = ""
+                areaRect = new Rect(25, 25, 400, 600),
+                areaName = "- DEBUG MENU -",
+                areaProperties = _areaProperties
             };
-            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Box, "Test Box"));
-            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Space, "5"));
-            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Box, "Test Box 2"));
-            newArea.areaProperties.Add(new MenuProperty(LayoutMenuProperties.Label, "Test Label"));
+
             menuLayout.menuAreas.Add(newArea);
         }
 
@@ -125,54 +354,27 @@ namespace core.modules
 
             foreach(MenuArea _area in menuLayout.menuAreas)
             {
+                // Draw menu
                 GUILayout.BeginArea(_area.areaRect, _area.areaName, "box");
+                
+                int counter = 0;
 
                 foreach(MenuProperty _property in _area.areaProperties)
                 {
-                    switch(_property.menuProperty)
-                    {
-                        case LayoutMenuProperties.Label:
-                        {
-                            GUILayout.Label(_property._value);
-                            break;
-                        }
-                        case LayoutMenuProperties.Space:
-                        {
-                            GUILayout.Space(int.Parse(_property._value));
-                            break;
-                        }
-                        case LayoutMenuProperties.Box:
-                        {
-                            GUILayout.Box(_property._value);
-                            break;
-                        }
+                    _property.RunProperty();
+
+                    if(_property.isSelectable) {
+                        if(counter == propertySelectionIndex)
+                            _property.ShowSelector();
+                        else
+                            _property.ClearSelector();
+
+                        counter++;
                     }
                 }
 
                 GUILayout.EndArea();
             }
-            
-            /* GUILayout.BeginArea(new Rect(0, 0, 400, 600), "", "box");
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(400), GUILayout.Height(500));
-            GUILayout.Box("Settings:");
-            GUILayout.Space(5);
-            GUILayout.Box("Sound:");
-            GUILayout.Label("Volume:");
-            GUILayout.BeginHorizontal();
-            
-            AudioListener.volume = GUILayout.HorizontalSlider(AudioListener.volume, 0.0f, 1.0f);
-            GUILayout.Label("" + AudioListener.volume.ToString("0.0"), "labelSound", GUILayout.MaxWidth(100));
-            GUILayout.EndHorizontal();
-            GUILayout.Space(500); // test scroll
-            fullscreenBool = GUILayout.Toggle(fullscreenBool, "FullScreen?");
-            GUILayout.EndScrollView();
-            
-            GUILayout.Space(25);
-            GUILayout.Label("______________________________________________");
-            GUILayout.Label("BUILD ID: XXXXXXX");
-            GUILayout.Label("BUILD DATE: 01-01-0101");
-
-            GUILayout.EndArea(); */
         }
 
         private void SetMatrix()
