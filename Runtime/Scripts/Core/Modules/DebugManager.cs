@@ -137,24 +137,30 @@ namespace core.modules
         bool timerDir = false;
 
         Color color = Color.white;
-        bool MenuProperty.isSelectable { get { return true; }}
+        bool MenuProperty.isSelectable { get { return _isSelectable; }}
+
+        bool _isSelectable = false;
 
         public GUILayoutOption GUILayoutOption { get; }
 
-        public MenuProperty_Label(string _customData)
+        public MenuProperty_Label(string _customData, bool isSelectable = false)
         {
             _data = _customData;
+
+            _isSelectable = isSelectable; 
         }
 
-        public MenuProperty_Label(string _customData, Color color)
+        public MenuProperty_Label(string _customData, Color color, bool isSelectable = false)
         {
             _data = _customData;
             
             if(color != null)
                 this.color = color;
+
+            _isSelectable = isSelectable; 
         }
 
-        public MenuProperty_Label(string _customData, GUILayoutOption gUILayoutOption, Color color, string style = "") : this(_customData)
+        public MenuProperty_Label(string _customData, GUILayoutOption gUILayoutOption, Color color, string style = "", bool isSelectable = false) : this(_customData)
         {
             _data = _customData;
             GUILayoutOption = gUILayoutOption;
@@ -162,6 +168,8 @@ namespace core.modules
 
             if(color != null)
                 this.color = color;
+
+            _isSelectable = isSelectable; 
         }
 
         public void RunProperty()
@@ -193,9 +201,9 @@ namespace core.modules
             _selector = ">>";
 
             if(timerDir)
-                timer -= Time.deltaTime * 2f;
+                timer -= Time.unscaledDeltaTime * 2f;
             else
-                timer += Time.deltaTime * 2f;
+                timer += Time.unscaledDeltaTime * 2f;
 
             if(timer > 1f)
             {
@@ -271,6 +279,10 @@ namespace core.modules
 
         private int propertySelectionIndex = 0;
 
+        private bool navIsPressed = false;
+
+        private string currentInputMap = "";
+
         public bool isActive
         {
             get
@@ -280,15 +292,29 @@ namespace core.modules
 
             set 
             {
-                // Check conditions for pausing the game
-                // if(value)
                 m_isActive = value;
 
-                // Wont this interfere?
                 if(m_isActive)
+                {
+                    propertySelectionIndex = 0;
+
                     SetMatrix();
+                    
+                    ActOnModule((InputManager _ref) =>
+                    {
+                        currentInputMap = _ref.GetCurrentMap();
+                        _ref.SwitchCurrentMap("UI");
+                    });
+                }
                 else
+                {
                     ResetMatrix();
+
+                    ActOnModule((InputManager _ref) =>
+                    {
+                        _ref.SwitchCurrentMap(currentInputMap);
+                    });
+                }
             }
         }
         
@@ -300,19 +326,29 @@ namespace core.modules
             currentMatrix = GUI.matrix;
             LoadDebugMenuStyle();
 
-            // Attach opening menu logic to action
+            // Attach opening menu logic to action map of Player
             ActOnModule((InputManager _ref) =>
             {
                 _ref.onActionPressed("Pause", (InputAction.CallbackContext callbackContext) =>
                 {
-                    OpenDebug();
+                    ToggleDebugMenu();
                 });
+            });
+            
+            // Attach opening menu logic to action map of UI
+            ActOnModule((InputManager _ref) =>
+            {
+                _ref.onActionPressed("Pause", (InputAction.CallbackContext callbackContext) =>
+                {
+                    ToggleDebugMenu();
+                }, "UI");
             });
         }
 
-        private void OpenDebug()
+        private void ToggleDebugMenu()
         {
             // Ask the gamemanager to pause the game
+            // If the game is already paused or it isnt possible, skip this
             isActive = !isActive;
         }
 
@@ -320,22 +356,21 @@ namespace core.modules
         {
             // Loads the style json and parse it to draw the debug menu
             menuLayout = new MenuLayout();
-            List<MenuProperty> _areaProperties = new List<MenuProperty>();
-            _areaProperties.Add(new MenuProperty_Space(30));
-            _areaProperties.Add(new MenuProperty_Box("Settings")); // Categories
-            
-            _areaProperties.Add(new MenuProperty_Label("Option Number one!"));
+            List<MenuProperty> _areaProperties = new List<MenuProperty>
+            {
+                new MenuProperty_Space(30),
+                new MenuProperty_Box("Settings"),
 
-            _areaProperties.Add(new MenuProperty_Space(10));
-            _areaProperties.Add(new MenuProperty_Box("Sound"));  // Categories
-
-            _areaProperties.Add(new MenuProperty_Label("Option Number two!"));
-
-            _areaProperties.Add(new MenuProperty_Space(50));
-            _areaProperties.Add(new MenuProperty_Label("______________________________________________", Color.red));
-            _areaProperties.Add(new MenuProperty_Space(5));
-            _areaProperties.Add(new MenuProperty_Label("BUILD ID: XXXXXXX", Color.red));
-            _areaProperties.Add(new MenuProperty_Label("BUILD DATE: 01-01-0101", Color.red));
+                new MenuProperty_Label("Option Number one!", true),
+                new MenuProperty_Space(10),
+                new MenuProperty_Box("Sound"),
+                new MenuProperty_Label("Option Number two!", true),
+                new MenuProperty_Space(50),
+                new MenuProperty_Label("______________________________________________", Color.red),
+                new MenuProperty_Space(5),
+                new MenuProperty_Label("BUILD ID: XXXXXXX", Color.red),
+                new MenuProperty_Label("BUILD DATE: 01-01-0101", Color.red)
+            };
 
             var newArea = new MenuArea
             {
@@ -347,6 +382,35 @@ namespace core.modules
             menuLayout.menuAreas.Add(newArea);
         }
 
+        private void UpdateControls(int maxSelectables)
+        {
+            ActOnModule((InputManager _ref) =>
+            {
+                Vector2 _nav = _ref.ReadActionValue("Navigate", false, "UI", Vector2.zero);
+
+                if(_nav.y < 0f && !navIsPressed)
+                {
+                    if(propertySelectionIndex >= maxSelectables - 1)
+                        propertySelectionIndex = 0;
+                    else
+                        propertySelectionIndex ++;
+
+                    navIsPressed = true;
+                }
+                else if(_nav.y > 0f && !navIsPressed)
+                {
+                    if(propertySelectionIndex == 0)
+                        propertySelectionIndex = maxSelectables - 1;
+                    else
+                        propertySelectionIndex--;
+
+                    navIsPressed = true;
+                }
+                else if(_nav.y == 0f)
+                    navIsPressed = false;
+            });
+        }
+
         private void DrawDebugMenu()
         {
             if(!isActive)
@@ -354,7 +418,6 @@ namespace core.modules
 
             foreach(MenuArea _area in menuLayout.menuAreas)
             {
-                // Draw menu
                 GUILayout.BeginArea(_area.areaRect, _area.areaName, "box");
                 
                 int counter = 0;
@@ -372,6 +435,8 @@ namespace core.modules
                         counter++;
                     }
                 }
+
+                UpdateControls(counter);
 
                 GUILayout.EndArea();
             }

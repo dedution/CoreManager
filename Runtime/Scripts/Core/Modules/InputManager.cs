@@ -103,58 +103,73 @@ namespace core.modules
             m_PlayerInput.SwitchCurrentActionMap(_map);
         }
 
-        /* button was pressed or is held */
-        public void onActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public string GetCurrentMap()
         {
-            m_PlayerInput.actions[_action].performed += _logicAction;
+            return m_PlayerInput.currentActionMap.name;
         }
 
-        public void UnsubscribeToActionHold(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void RestoreCurrentMap()
         {
-            m_PlayerInput.actions[_action].performed -= _logicAction;
+            SwitchCurrentMap(m_PlayerInput.defaultActionMap);
+        }
+
+        /* button was pressed or is held */
+        public void onActionHold(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
+        {
+            m_PlayerInput.actions.FindActionMap(_map)[_action].performed += _logicAction;
+        }
+
+        public void UnsubscribeToActionHold(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
+        {
+            m_PlayerInput.actions.FindActionMap(_map)[_action].performed -= _logicAction;
         }
 
         /* button was pressed */
-        public void onActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void onActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions[_action].started += _logicAction;
+            m_PlayerInput.actions.FindActionMap(_map)[_action].started += _logicAction;
         }
 
         /* button was released */
-        public void onActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void onActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions[_action].canceled += _logicAction;
+            m_PlayerInput.actions.FindActionMap(_map)[_action].canceled += _logicAction;
         }
 
-        public void UnsubscribeToActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void UnsubscribeToActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions[_action].started -= _logicAction;
+            m_PlayerInput.actions.FindActionMap(_map)[_action].started -= _logicAction;
         }
 
-        public void UnsubscribeToActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction)
+        public void UnsubscribeToActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions[_action].canceled -= _logicAction;
+            m_PlayerInput.actions.FindActionMap(_map)[_action].canceled -= _logicAction;
         }
 
-        public bool IsActionPressed(string _action)
+        public bool IsActionPressed(string _action, string _map = "Player")
         {
-            return m_PlayerInput.actions[_action].IsPressed();
+            return m_PlayerInput.actions.FindActionMap(_map)[_action].IsPressed();
         }
 
-        public bool IsActionReleased(string _action)
+        public bool IsActionReleased(string _action, string _map = "Player")
         {
-            return m_PlayerInput.actions[_action].WasReleasedThisFrame();
+            return m_PlayerInput.actions.FindActionMap(_map)[_action].WasReleasedThisFrame();
         }
 
-        public bool IsActionPressedThisFrame(string _action)
+        public bool IsActionPressedThisFrame(string _action, string _map = "Player")
         {
-            return m_PlayerInput.actions[_action].WasPressedThisFrame();
+            return m_PlayerInput.actions.FindActionMap(_map)[_action].WasPressedThisFrame();
         }
 
         // Read direct values from action
-        public T ReadActionValue<T>(string _action) where T : struct
+        public T ReadActionValue<T>(string _action, bool checkReleased = false, string _map = "Player", T _default = default(T)) where T : struct
         {
-            return m_PlayerInput.actions[_action].ReadValue<T>();
+            InputAction _InputAction = m_PlayerInput.actions.FindActionMap(_map)[_action];
+
+            if(!checkReleased)
+                return _InputAction.ReadValue<T>();
+            else
+                return _InputAction.WasReleasedThisFrame() ? _default : _InputAction.ReadValue<T>();
         }
 
         // Here for now
