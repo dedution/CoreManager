@@ -116,49 +116,64 @@ namespace core.modules
         /* button was pressed or is held */
         public void onActionHold(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions.FindActionMap(_map)[_action].performed += _logicAction;
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                m_PlayerInput.actions.FindActionMap(_map)[_action].performed += _logicAction;
         }
 
         public void UnsubscribeToActionHold(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions.FindActionMap(_map)[_action].performed -= _logicAction;
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                m_PlayerInput.actions.FindActionMap(_map)[_action].performed -= _logicAction;
         }
 
         /* button was pressed */
         public void onActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions.FindActionMap(_map)[_action].started += _logicAction;
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                m_PlayerInput.actions.FindActionMap(_map)[_action].started += _logicAction;
         }
 
         /* button was released */
         public void onActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions.FindActionMap(_map)[_action].canceled += _logicAction;
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                m_PlayerInput.actions.FindActionMap(_map)[_action].canceled += _logicAction;
         }
 
         public void UnsubscribeToActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions.FindActionMap(_map)[_action].started -= _logicAction;
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                m_PlayerInput.actions.FindActionMap(_map)[_action].started -= _logicAction;
         }
 
         public void UnsubscribeToActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
-            m_PlayerInput.actions.FindActionMap(_map)[_action].canceled -= _logicAction;
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                m_PlayerInput.actions.FindActionMap(_map)[_action].canceled -= _logicAction;
         }
 
         public bool IsActionPressed(string _action, string _map = "Player")
         {
-            return m_PlayerInput.actions.FindActionMap(_map)[_action].IsPressed();
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                return m_PlayerInput.actions.FindActionMap(_map)[_action].IsPressed();
+            else
+                return false;
         }
 
         public bool IsActionReleased(string _action, string _map = "Player")
         {
-            return m_PlayerInput.actions.FindActionMap(_map)[_action].WasReleasedThisFrame();
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                return m_PlayerInput.actions.FindActionMap(_map)[_action].WasReleasedThisFrame();
+            else
+                return false;
         }
 
         public bool IsActionPressedThisFrame(string _action, string _map = "Player")
         {
-            return m_PlayerInput.actions.FindActionMap(_map)[_action].WasPressedThisFrame();
+            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+                return m_PlayerInput.actions.FindActionMap(_map)[_action].WasPressedThisFrame();
+            else
+                return false;
         }
 
         // Read direct values from action
@@ -166,10 +181,10 @@ namespace core.modules
         {
             InputAction _InputAction = m_PlayerInput.actions.FindActionMap(_map)[_action];
 
-            if(!checkReleased)
+            if(_InputAction != null && !checkReleased)
                 return _InputAction.ReadValue<T>();
             else
-                return _InputAction.WasReleasedThisFrame() ? _default : _InputAction.ReadValue<T>();
+                return ( _InputAction == null || _InputAction.WasReleasedThisFrame()) ? _default : _InputAction.ReadValue<T>();
         }
 
         // Here for now
