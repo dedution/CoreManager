@@ -21,7 +21,7 @@ namespace core.gameplay
         }
     }
 
-    public abstract class baseGameActor : MonoBehaviour
+    public class baseGameActor : MonoBehaviour
     {
         // Variables
         [Header("Actor Params")]

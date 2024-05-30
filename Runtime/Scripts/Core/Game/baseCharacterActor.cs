@@ -25,7 +25,7 @@ namespace core.gameplay
     [RequireComponent(typeof(NavMeshAgent))]
     [RequireComponent(typeof(Animator))]
 
-    public abstract class baseCharacterActor : baseGameActor
+    public class baseCharacterActor : baseGameActor
     {
         // AI Common components
         [Header("Component references")]

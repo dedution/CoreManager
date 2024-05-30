@@ -86,7 +86,7 @@ namespace core.modules
             {
                 baseGameActor _actor = FindActorByInstanceID(collider.GetInstanceID());
                 
-                if (!ReferenceEquals(_actor, null) && _actor is T)
+                if (!ReferenceEquals(_actor, null) && _actor.GetType().IsSubclassOf(typeof(T)))
                 {
                     availableActors.Add((T)(object)_actor);
                 }
