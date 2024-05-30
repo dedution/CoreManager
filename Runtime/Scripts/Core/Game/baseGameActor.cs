@@ -25,7 +25,7 @@ namespace core.gameplay
     {
         // Variables
         [Header("Actor Params")]
-        public ActorTypes actorType = ActorTypes.System;
+        //public ActorTypes actorType = ActorTypes.System;
         public bool actorUpdatesViaManager = false;
 
         [Header("Save System")]
@@ -44,14 +44,11 @@ namespace core.gameplay
         }
 
         protected virtual void onStart()
-        {
-        }
+        {}
 
+        // Called via Actor Manager Module
         public virtual void onUpdate()
-        {
-            // Called via Actor Manager Module
-            // Use with caution
-        }
+        {}
 
         protected T SaveSystem_GetData<T>(string _dataKey, T _defaultData)
         {
@@ -66,12 +63,7 @@ namespace core.gameplay
         protected void SaveSystem_SetData<T>(string _dataKey, T _savedata)
         {
             if (saveData.Enabled)
-            {
-                ActOnModule((SaveSystemManager _ref) =>
-                {
-                    _ref.SaveSystem_GameData_Set(saveData.GUID, _dataKey, _savedata);
-                });
-            }
+                ActOnModule((SaveSystemManager _ref) => { _ref.SaveSystem_GameData_Set(saveData.GUID, _dataKey, _savedata); });
         }
 
         private void Destroy()

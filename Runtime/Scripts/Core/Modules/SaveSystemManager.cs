@@ -104,6 +104,9 @@ namespace core.modules
             //EventManager.TriggerEvent("SubtitleManager", new Dictionary<string, object> { { "SETTINGS_ALLOWSUBTITLES", SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false) } });
         }
 
+        /// <summary>
+        /// Saves into memory a pair of data. This pair is associated with a unique actor and consists of a key of type string and a value of type T. 
+        /// </summary>
         public void SaveSystem_GameData_Set<T>(string actorGUID, string key, T data)
         {
             string _dataParse = DataToBinaryString(data);
@@ -117,6 +120,9 @@ namespace core.modules
             }
         }
 
+        /// <summary>
+        /// Returns a pair of data from memory with a specific key of type string 
+        /// </summary>
         public T SaveSystem_GameData_Get<T>(string actorGUID, string key, T defaultData)
         {
             string _stringDefaultData = DataToBinaryString(defaultData);
@@ -129,7 +135,10 @@ namespace core.modules
             else
                 return defaultData;
         }
-
+        
+        /// <summary>
+        /// Tells Save System Module to save data to disk. This process is async and the SaveSystem event can be used to determine the current state 
+        /// </summary>
         public void SaveSystem_Game_Save()
         {
             // Save data to file
@@ -141,6 +150,9 @@ namespace core.modules
             IOController.WriteDataToFile<GameSaveData>(_Path, gameSaveData, true, true, onSaveDataSuccess);
         }
 
+        /// <summary>
+        /// Tells Save System Module to load data from disk into memory. This process is async and the SaveSystem event can be used to determine the current state 
+        /// </summary>
         public void SaveSystem_Game_Load()
         {
             // Load and process data from file

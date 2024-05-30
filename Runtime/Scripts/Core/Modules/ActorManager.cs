@@ -8,18 +8,18 @@ using System.Linq;
 
 namespace core.modules
 {
-    public enum ActorTypes
-    {
-        System,
-        Player,
-        Enemy,
-        Character,
-        Interactable // Pinged by the player
-    }
+    // public enum ActorTypes
+    // {
+    //     System,
+    //     Player,
+    //     Enemy,
+    //     Character,
+    //     Interactable // Pinged by the player
+    // }
 
     public class ActorManager : BaseModule
     {
-        private List<baseGameActor> m_registeredActors = new List<baseGameActor>();
+        private Dictionary<int, baseGameActor> m_registeredActors = new Dictionary<int, baseGameActor>();
         private delegate void ActorUpdater();
         private ActorUpdater UpdateActors;
 
@@ -36,7 +36,7 @@ namespace core.modules
         {
             if (!ReferenceEquals(_actor, null))
             {
-                m_registeredActors.Add(_actor);
+                m_registeredActors.Add(_actor.GetInstanceID(), _actor);
                 
                 if(_actor.actorUpdatesViaManager)
                     UpdateActors += _actor.onUpdate;
@@ -47,17 +47,52 @@ namespace core.modules
         {
             if (!ReferenceEquals(_actor, null))
             {
-                m_registeredActors.Remove(_actor);
+                m_registeredActors.Remove(_actor.GetInstanceID());
 
                 if(_actor.actorUpdatesViaManager)
                     UpdateActors -= _actor.onUpdate;
             }
         }
 
-        public baseGameActor[] GetActorsByType(ActorTypes _aType)
+        // Inefficient way of getting specific types - DEPRECATED
+        // public baseGameActor[] GetActorsByType(ActorTypes _aType)
+        // {
+        //     var _actors = m_registeredActors.Where(_actor => _actor.actorType == _aType).ToArray();
+        //     return _actors;
+        // }
+
+        public baseGameActor FindActorByInstanceID(GameObject _gameobject)
         {
-            var _actors = m_registeredActors.Where(_actor => _actor.actorType == _aType).ToArray();
-            return _actors;
+            if(m_registeredActors.ContainsKey(_gameobject.GetInstanceID()))
+                return m_registeredActors[_gameobject.GetInstanceID()];
+            else
+                return null;
+        }
+
+        public baseGameActor FindActorByInstanceID(int _IDx)
+        {
+            if(m_registeredActors.ContainsKey(_IDx))
+                return m_registeredActors[_IDx];
+            else
+                return null;
+        }
+        
+        public T[] FindActorsInCollisionRange<T>(float searchRadius, Vector3 searchPoint,  LayerMask searchLayer)
+        {
+            Collider[] hitColliders = Physics.OverlapSphere(searchPoint, searchRadius, searchLayer);
+            List<T> availableActors = new List<T>();
+
+            foreach (Collider collider in hitColliders)
+            {
+                baseGameActor _actor = FindActorByInstanceID(collider.GetInstanceID());
+                
+                if (!ReferenceEquals(_actor, null) && _actor is T)
+                {
+                    availableActors.Add((T)(object)_actor);
+                }
+            }
+
+            return availableActors.ToArray();
         }
 
         public override void UpdateModule()
