@@ -36,7 +36,7 @@ namespace core.modules
         {
             if (!ReferenceEquals(_actor, null))
             {
-                m_registeredActors.Add(_actor.GetInstanceID(), _actor);
+                m_registeredActors.Add(_actor.gameObject.GetInstanceID(), _actor);
                 
                 if(_actor.actorUpdatesViaManager)
                     UpdateActors += _actor.onUpdate;
@@ -47,7 +47,7 @@ namespace core.modules
         {
             if (!ReferenceEquals(_actor, null))
             {
-                m_registeredActors.Remove(_actor.GetInstanceID());
+                m_registeredActors.Remove(_actor.gameObject.GetInstanceID());
 
                 if(_actor.actorUpdatesViaManager)
                     UpdateActors -= _actor.onUpdate;
@@ -84,7 +84,7 @@ namespace core.modules
 
             foreach (Collider collider in hitColliders)
             {
-                baseGameActor _actor = FindActorByInstanceID(collider.GetInstanceID());
+                baseGameActor _actor = FindActorByInstanceID(collider.gameObject.GetInstanceID());
                 
                 if (!ReferenceEquals(_actor, null) && _actor.GetType().IsSubclassOf(typeof(T)))
                 {
