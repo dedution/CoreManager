@@ -8,18 +8,9 @@ using System.Linq;
 
 namespace core.modules
 {
-    // public enum ActorTypes
-    // {
-    //     System,
-    //     Player,
-    //     Enemy,
-    //     Character,
-    //     Interactable // Pinged by the player
-    // }
-
     public class ActorManager : BaseModule
     {
-        private Dictionary<int, baseGameActor> m_registeredActors = new Dictionary<int, baseGameActor>();
+        private Dictionary<Type, List<baseGameActor>> m_registeredActors = new Dictionary<Type, List<baseGameActor>>();
         private delegate void ActorUpdater();
         private ActorUpdater UpdateActors;
 
@@ -29,15 +20,17 @@ namespace core.modules
 
         public override void onInitialize()
         {
-
         }
 
         public void RegisterActor(baseGameActor _actor)
         {
             if (!ReferenceEquals(_actor, null))
             {
-                m_registeredActors.Add(_actor.gameObject.GetInstanceID(), _actor);
-                
+                if(!m_registeredActors.ContainsKey(_actor.GetType().BaseType))
+                    m_registeredActors.Add(_actor.GetType().BaseType, new List<baseGameActor>());
+
+                m_registeredActors[_actor.GetType().BaseType].Add(_actor);
+
                 if(_actor.actorUpdatesViaManager)
                     UpdateActors += _actor.onUpdate;
             }
@@ -47,49 +40,34 @@ namespace core.modules
         {
             if (!ReferenceEquals(_actor, null))
             {
-                m_registeredActors.Remove(_actor.gameObject.GetInstanceID());
+                if(m_registeredActors.ContainsKey(_actor.GetType().BaseType))
+                    m_registeredActors[_actor.GetType().BaseType].Remove(_actor);
 
                 if(_actor.actorUpdatesViaManager)
                     UpdateActors -= _actor.onUpdate;
             }
         }
 
-        // Inefficient way of getting specific types - DEPRECATED
-        // public baseGameActor[] GetActorsByType(ActorTypes _aType)
-        // {
-        //     var _actors = m_registeredActors.Where(_actor => _actor.actorType == _aType).ToArray();
-        //     return _actors;
-        // }
-
-        public baseGameActor FindActorByInstanceID(GameObject _gameobject)
+        // Returns actors based on class type and gameobject instance id
+        public T[] FindActors<T>(int _actorInstanceID)
         {
-            if(m_registeredActors.ContainsKey(_gameobject.GetInstanceID()))
-                return m_registeredActors[_gameobject.GetInstanceID()];
+            if(m_registeredActors.ContainsKey(typeof(T)) || typeof(T).IsSubclassOf(typeof(T)))
+                return m_registeredActors[typeof(T)].Where(_actor => _actor.gameObject.GetInstanceID() == _actorInstanceID).Cast<T>().ToArray();
             else
                 return null;
         }
 
-        public baseGameActor FindActorByInstanceID(int _IDx)
-        {
-            if(m_registeredActors.ContainsKey(_IDx))
-                return m_registeredActors[_IDx];
-            else
-                return null;
-        }
-        
         public T[] FindActorsInCollisionRange<T>(float searchRadius, Vector3 searchPoint,  LayerMask searchLayer)
         {
             Collider[] hitColliders = Physics.OverlapSphere(searchPoint, searchRadius, searchLayer);
             List<T> availableActors = new List<T>();
 
-            foreach (Collider collider in hitColliders)
+            for (int i = 0; i < hitColliders.Length; i++)
             {
-                baseGameActor _actor = FindActorByInstanceID(collider.gameObject.GetInstanceID());
-                
-                if (!ReferenceEquals(_actor, null) && _actor.GetType().IsSubclassOf(typeof(T)))
-                {
-                    availableActors.Add((T)(object)_actor);
-                }
+                T[] _actors = FindActors<T>(hitColliders[i].gameObject.GetInstanceID());
+
+                if(!ReferenceEquals(_actors, null))
+                    availableActors.AddRange(_actors);
             }
 
             return availableActors.ToArray();

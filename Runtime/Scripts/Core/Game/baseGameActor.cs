@@ -21,11 +21,10 @@ namespace core.gameplay
         }
     }
 
-    public class baseGameActor : MonoBehaviour
+    public abstract class baseGameActor : MonoBehaviour
     {
         // Variables
         [Header("Actor Params")]
-        //public ActorTypes actorType = ActorTypes.System;
         public bool actorUpdatesViaManager = false;
 
         [Header("Save System")]

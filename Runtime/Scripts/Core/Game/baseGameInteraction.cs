@@ -4,7 +4,7 @@ using static core.GameManager;
 
 namespace core.gameplay
 {
-    public class baseGameInteraction : baseGameActor
+    public abstract class baseGameInteraction : baseGameActor
     {
         [Header("Interaction Parameters")]
         public bool m_isInteractable = true;
