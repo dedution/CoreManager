@@ -31,6 +31,10 @@ namespace core.modules
         German
     }
 
+    // TODO
+    // Port logic for auto translation of locstrings using the Evil Below method
+    // Adapt that logic to use AI like chatGPT to handle the translations
+
     public class LocaleManager : BaseModule
     {
         private delegate void LocaleRefDelegate();
@@ -40,7 +44,7 @@ namespace core.modules
         private const LocalizationLanguages defaultLanguage = LocalizationLanguages.English;
         private LocalizationLanguages currentLanguage = LocalizationLanguages.English;
 
-        private bool LocalIsLoaded { get; set;} = false;
+        private bool LocalIsLoaded { get; set; } = false;
 
         public override void onInitialize()
         {
@@ -70,13 +74,13 @@ namespace core.modules
             GameManager.RunCoroutine(LoadLocalizationData(path));
         }
 
-        public string Locale_GetLocale(string _symbol)
+        public string Locale_GetLocString(string _locID)
         {
-            //Return correct translation
-            if (LocalizationData.ContainsKey(_symbol))
-                return LocalizationData[_symbol];
+            // Return correct translation
+            if (LocalizationData.ContainsKey(_locID))
+                return LocalizationData[_locID];
             else
-                return _symbol;
+                return _locID;
         }
 
         public void Locale_RegisterRef(ILocale _localRef)
@@ -117,6 +121,7 @@ namespace core.modules
 
                 using (FileStream fileStream = File.OpenRead(filePath))
                 {
+                    // this while needs to be reworked
                     while (true)
                     {
                         int numBytesRead = fileStream.Read(buffer, 0, buffer.Length);
@@ -133,7 +138,7 @@ namespace core.modules
                 yield return null;
                 dataAsJson = Encoding.UTF8.GetString(jsonStream.ToArray());
             }
-
+            // JSON functions need to be ported over to IOController
             LocaleData _localizationData = JsonUtility.FromJson<LocaleData>(dataAsJson);
 
             foreach (LocalePair loc in _localizationData.localization)

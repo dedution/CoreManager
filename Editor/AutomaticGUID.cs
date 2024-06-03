@@ -24,17 +24,17 @@ public class AutomaticGUID : Editor
 
         foreach (baseGameActor o in actors)
         {
-            if (!o.saveData.Enabled)
+            if (!o.saveDataParameters.Enabled)
                 continue;
 
-            o.saveData.GenerateGUID();
+            o.saveDataParameters.GenerateGUID();
             EditorUtility.SetDirty(o);
             EditorSceneManager.MarkSceneDirty(o.gameObject.scene);
 
             dirtyCounter++;
         }
 
-        List<string> conflicts = actors.GroupBy(x => x.saveData.GUID).Where(group => group.Count() > 1).Select(group => group.Key).ToList();
+        List<string> conflicts = actors.GroupBy(x => x.saveDataParameters.GUID).Where(group => group.Count() > 1).Select(group => group.Key).ToList();
 
         if (conflicts.Count() > 0)
             Debug.LogError(string.Format(">> FAILED to generate GUIDs. {0} repeated GUIDs on GameActors!", conflicts.Count()));
@@ -59,10 +59,10 @@ public class AutomaticGUID : Editor
 
         foreach (baseGameActor o in actors)
         {
-            if (!o.saveData.Enabled)
+            if (!o.saveDataParameters.Enabled)
                 continue;
 
-            o.saveData.GenerateGUID();
+            o.saveDataParameters.GenerateGUID();
             EditorUtility.SetDirty(o);
             EditorSceneManager.MarkSceneDirty(o.gameObject.scene);
 
@@ -72,7 +72,7 @@ public class AutomaticGUID : Editor
         // Find conflicts in all that we can fetch
         actors = FindObjectsOfType<baseGameActor>().ToList();
 
-        List<string> conflicts = actors.GroupBy(x => x.saveData.GUID).Where(group => group.Count() > 1).Select(group => group.Key).ToList();
+        List<string> conflicts = actors.GroupBy(x => x.saveDataParameters.GUID).Where(group => group.Count() > 1).Select(group => group.Key).ToList();
 
         if (conflicts.Count() > 0)
             Debug.LogError(string.Format(">> FAILED to generate GUIDs. {0} repeated GUIDs on GameActors!", conflicts.Count()));
@@ -88,10 +88,10 @@ public class AutomaticGUID : Editor
 
         foreach (baseGameActor o in actors)
         {
-            if (!o.saveData.Enabled)
+            if (!o.saveDataParameters.Enabled)
                 continue;
 
-            o.saveData.GUID = "";
+            o.saveDataParameters.GUID = "";
             EditorUtility.SetDirty(o);
             EditorSceneManager.MarkSceneDirty(o.gameObject.scene);
 
@@ -128,7 +128,7 @@ public class AutomaticGUID : Editor
                 if (_actor)
                 {
                     // Generate GUID
-                    _actor.saveData.GenerateGUID();
+                    _actor.saveDataParameters.GenerateGUID();
                     EditorUtility.SetDirty(obj);
                     ++changes;
                     hasChanges = true;

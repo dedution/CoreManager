@@ -3,13 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using core.gameplay;
-using UnityEngine.Experimental.AI;
 using System.Linq;
 
 namespace core.modules
 {
     public class ActorManager : BaseModule
     {
+        private baseGameActor m_playerController;
+
+        public baseGameActor PlayerController
+        {
+            set { m_playerController = value; }
+            get { return m_playerController; }
+        }
+
         private Dictionary<Type, List<baseGameActor>> m_registeredActors = new Dictionary<Type, List<baseGameActor>>();
         private delegate void ActorUpdater();
         private ActorUpdater UpdateActors;
@@ -20,6 +27,7 @@ namespace core.modules
 
         public override void onInitialize()
         {
+            
         }
 
         public void RegisterActor(baseGameActor _actor)

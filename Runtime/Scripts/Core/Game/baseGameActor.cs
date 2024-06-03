@@ -28,7 +28,7 @@ namespace core.gameplay
         public bool actorUpdatesViaManager = false;
 
         [Header("Save System")]
-        public ActorsaveData saveData = new ActorsaveData();
+        public ActorsaveData saveDataParameters = new ActorsaveData();
 
         void Start()
         {
@@ -53,16 +53,16 @@ namespace core.gameplay
         {
             T _data = _defaultData;
 
-            if (saveData.Enabled)
-                ActOnModule((SaveSystemManager _ref) => { _data = _ref.SaveSystem_GameData_Get(saveData.GUID, _dataKey, _defaultData); });
+            if (saveDataParameters.Enabled)
+                ActOnModule((SaveSystemManager _ref) => { _data = _ref.SaveSystem_GameData_Get(saveDataParameters.GUID, _dataKey, _defaultData); });
 
             return _data;
         }
 
         protected void SaveSystem_SetData<T>(string _dataKey, T _savedata)
         {
-            if (saveData.Enabled)
-                ActOnModule((SaveSystemManager _ref) => { _ref.SaveSystem_GameData_Set(saveData.GUID, _dataKey, _savedata); });
+            if (saveDataParameters.Enabled)
+                ActOnModule((SaveSystemManager _ref) => { _ref.SaveSystem_GameData_Set(saveDataParameters.GUID, _dataKey, _savedata); });
         }
 
         private void Destroy()

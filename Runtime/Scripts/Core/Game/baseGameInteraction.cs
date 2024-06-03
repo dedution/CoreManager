@@ -10,19 +10,9 @@ namespace core.gameplay
         public bool m_isInteractable = true;
         public Transform m_customInteractionTarget;
 
-        protected override void onStart()
-        {
-            base.onStart();
-        }
-
-        public override void onUpdate()
-        {
-            base.onUpdate();
-        }
-
         public virtual void onInteract()
         {
-
+            
         }
 
         public Vector3 GetInteractionPosition()
