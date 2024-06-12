@@ -7,264 +7,12 @@ using System.Collections.Generic;
 using static core.GameManager;
 using UnityEngine.InputSystem;
 using System.Linq;
+using core.debug.layouts;
+using static core.debug.diagnostics.DebugDiagnostics;
+using UnityEditor;
 
 namespace core.modules
 {
-    public class MenuLayout
-    {
-        public List<MenuArea> menuAreas = new List<MenuArea>();
-    }
-
-    public class MenuArea
-    {
-        public string areaName = "";
-        public Rect areaRect;
-        public List<MenuProperty> areaProperties = new List<MenuProperty>();
-    }
-
-    public class MenuProperty_ScrollView : MenuProperty
-    {
-        private bool isStart = false;
-        private GUILayoutOption gUILayoutOption1;
-        private GUILayoutOption gUILayoutOption2;
-        private Vector2 scrollPosition;
-
-        bool MenuProperty.isSelectable { get { return false; }}
-
-        public MenuProperty_ScrollView(bool isStart, GUILayoutOption gUILayoutOption1, GUILayoutOption gUILayoutOption2)
-        {
-            this.isStart = isStart;
-            this.gUILayoutOption1 = gUILayoutOption1;
-            this.gUILayoutOption2 = gUILayoutOption2;
-        }
-
-        public MenuProperty_ScrollView(bool isStart)
-        {
-            this.isStart = isStart;
-        }
-
-        public void RunProperty()
-        {
-            if(isStart)
-                scrollPosition = GUILayout.BeginScrollView(scrollPosition, gUILayoutOption1, gUILayoutOption2);
-            else
-                GUILayout.EndScrollView();
-        }
-    }
-
-    public class MenuProperty_Box : MenuProperty
-    {
-        string _data = "";
-        bool MenuProperty.isSelectable { get { return false; }}
-        
-        public MenuProperty_Box(string _customData)
-        {
-            _data = _customData;
-        }
-
-        public void RunProperty()
-        {
-            GUILayout.Box(_data);
-        }
-    }
-
-    public class MenuProperty_Horizontal : MenuProperty
-    {
-        bool isStart = false;
-        bool MenuProperty.isSelectable { get { return false; }}
-        
-        public MenuProperty_Horizontal(bool isStart)
-        {
-            this.isStart = isStart;
-        }
-
-        public void RunProperty()
-        {
-            if(isStart)
-                GUILayout.BeginHorizontal();
-            else
-                GUILayout.EndHorizontal();
-        }
-    }
-
-    public class MenuProperty_Toggle: MenuProperty
-    {
-        bool val = false;
-        string label = "";
-
-        public Action<bool> OnUpdate;
-        bool MenuProperty.isSelectable { get { return false; }}
-        
-        public MenuProperty_Toggle(bool val, string label, Action<bool> OnUpdate)
-        {
-            this.val = val;
-            this.label = label;
-            this.OnUpdate = OnUpdate;
-        }
-
-        public void RunProperty()
-        {
-            val = GUILayout.Toggle(val, label);
-            OnUpdate.Invoke(val);
-        }
-    }
-
-    public class MenuProperty_Space : MenuProperty
-    {
-        float _data = 0f;
-        bool MenuProperty.isSelectable { get { return false; }}
-        
-        public MenuProperty_Space(float _customData)
-        {
-            _data = _customData;
-        }
-
-        public void RunProperty()
-        {
-            GUILayout.Space(_data);
-        }
-    }
-
-    public class MenuProperty_Label : MenuProperty
-    {
-        string _data = "";
-
-        string _selector = "";
-
-        string _style = "";
-
-        float timer = 0f;
-        bool timerDir = false;
-
-        Color color = Color.white;
-        bool MenuProperty.isSelectable { get { return _isSelectable; }}
-
-        bool _isSelectable = false;
-
-        public GUILayoutOption GUILayoutOption { get; }
-
-        public MenuProperty_Label(string _customData, bool isSelectable = false)
-        {
-            _data = _customData;
-
-            _isSelectable = isSelectable; 
-        }
-
-        public MenuProperty_Label(string _customData, Color color, bool isSelectable = false)
-        {
-            _data = _customData;
-            
-            if(color != null)
-                this.color = color;
-
-            _isSelectable = isSelectable; 
-        }
-
-        public MenuProperty_Label(string _customData, GUILayoutOption gUILayoutOption, Color color, string style = "", bool isSelectable = false) : this(_customData)
-        {
-            _data = _customData;
-            GUILayoutOption = gUILayoutOption;
-            _style = style;
-
-            if(color != null)
-                this.color = color;
-
-            _isSelectable = isSelectable; 
-        }
-
-        public void RunProperty()
-        {
-            GUIStyle _style = new GUIStyle();
-            _style.wordWrap = false;
-            _style.normal.textColor = color;
-
-            GUIStyle _styleSelector = new GUIStyle();
-            _styleSelector.wordWrap = false;
-            _styleSelector.normal.textColor = Color.yellow;
-            _styleSelector.fontStyle = FontStyle.Bold;
-
-            GUILayout.BeginHorizontal();
-            {
-                string finaldata = (_selector.Length > 0 ? "         " : "") + _data;
-                GUILayout.Label(finaldata, _style, GUILayout.ExpandWidth(false));
-                Rect _rect = GUILayoutUtility.GetLastRect();
-                _rect.xMin += timer * 10f;
-
-                GUI.Label(_rect, _selector, _styleSelector);
-            }
-            
-            GUILayout.EndHorizontal();
-        }
-
-        public void ShowSelector()
-        {
-            _selector = ">>";
-
-            if(timerDir)
-                timer -= Time.unscaledDeltaTime * 2f;
-            else
-                timer += Time.unscaledDeltaTime * 2f;
-
-            if(timer > 1f)
-            {
-                timerDir = true;
-            }
-            else if(timer < 0f)
-            {
-                timerDir = false;
-            }
-        }
-
-        public void ClearSelector()
-        {
-            _selector = "";
-        }
-    }
-
-    public class MenuProperty_Slider : MenuProperty
-    {
-        public float currentValue { get; set;}
-        public float minValue { get; }
-        public float maxValue { get; }
-        bool MenuProperty.isSelectable { get { return false; }}
-
-        public Action<float> OnUpdate;
-
-        public MenuProperty_Slider(float currentValue, float minValue, float maxValue, Action<float> OnUpdate)
-        {
-            this.currentValue = currentValue;
-            this.minValue = minValue;
-            this.maxValue = maxValue;
-            this.OnUpdate = OnUpdate;
-        }
-
-        public void RunProperty()
-        {
-            currentValue = GUILayout.HorizontalSlider(currentValue, minValue, maxValue);
-            OnUpdate.Invoke(currentValue);
-        }
-    }
-
-    public interface MenuProperty
-    {
-        bool isSelectable { get;}
-
-        public void RunProperty()
-        {
-            // Run logic 
-        }
-
-        public void ShowSelector()
-        {
-
-        }
-
-        public void ClearSelector()
-        {
-
-        }
-    }
-
     public class DebugManager : BaseModule
     {
         // TODO
@@ -274,6 +22,29 @@ namespace core.modules
 
         private Matrix4x4 currentMatrix;
         private bool m_isActive = false;
+
+        private Rect m_rectDiagnosticsLabel = new Rect(10, 35, 150, 20);
+
+        // Things like FPS counter, memory usage and batching
+        private bool showDiagnostics = false;
+
+        public bool m_showDiagnostics
+        {
+            get
+            {
+                return showDiagnostics;
+            }
+
+            set 
+            {
+                showDiagnostics = value;
+
+                if(showDiagnostics)
+                    StartTrackingAssetMemory();
+                else
+                    StopTrackingAssetMemory();
+            }
+        }
 
         private MenuLayout menuLayout;
 
@@ -298,8 +69,6 @@ namespace core.modules
                 {
                     propertySelectionIndex = 0;
 
-                    SetMatrix();
-                    
                     ActOnModule((InputManager _ref) =>
                     {
                         currentInputMap = _ref.GetCurrentMap();
@@ -308,8 +77,6 @@ namespace core.modules
                 }
                 else
                 {
-                    ResetMatrix();
-
                     ActOnModule((InputManager _ref) =>
                     {
                         _ref.SwitchCurrentMap(currentInputMap);
@@ -320,6 +87,8 @@ namespace core.modules
         
         // Default size of debug manager
         private Vector2 nativeSize = new Vector2(1280, 720);
+
+        private static GUIStyle m_labelStyle = new GUIStyle();
 
         public override void onInitialize()
         {
@@ -343,6 +112,9 @@ namespace core.modules
                     ToggleDebugMenu();
                 }, "UI");
             });
+
+            // Initialize the diagnostics logic
+            InitDiagnostics();
         }
 
         private void ToggleDebugMenu()
@@ -442,6 +214,63 @@ namespace core.modules
             }
         }
 
+        private void DrawDiagnostics()
+        {
+            if(!m_showDiagnostics)
+                return;
+            
+            DrawFramerate();
+
+            DrawMemoryUsage();
+        }
+
+        private void DrawFramerate()
+        {
+            // Draw the current framerate at the top left of the screen
+            m_labelStyle.alignment = TextAnchor.MiddleCenter;
+            float currentFramerate = GetCurrentFramerate();
+
+            if(currentFramerate < 30)
+                m_labelStyle.normal.textColor = Color.red;
+            else if(currentFramerate < 50)
+                m_labelStyle.normal.textColor = Color.yellow;
+            else
+                m_labelStyle.normal.textColor = Color.green;
+
+            GUI.Label(new Rect(10, 10, 50, 20), string.Format("{0} FPS", currentFramerate.ToString()), m_labelStyle);
+        }
+
+        private void DrawMemoryUsage()
+        {
+            m_labelStyle.alignment = TextAnchor.MiddleLeft;
+            m_labelStyle.normal.textColor = Color.white;
+            m_rectDiagnosticsLabel.x = nativeSize.x - 240;
+            m_rectDiagnosticsLabel.y = 35;
+
+            DrawDiagnosticLabel("--- {0} --------------", "MEMORY USAGE", 25);
+            DrawDiagnosticLabel("Total Reserved memory: {0} MB", GetTotalReservedMemory().ToString(), 15);
+            DrawDiagnosticLabel("Allocated memory: {0} MB", GetAllocatedMemory().ToString(), 15);
+            DrawDiagnosticLabel("Reserved but not allocated: {0} MB", GetReservedMemory().ToString(), 15);
+            DrawDiagnosticLabel("Used Mesh Memory: {0} MB", GetUsedMeshMemory().ToString(), 15);
+            DrawDiagnosticLabel("Used Texture Memory: {0} MB", GetUsedTextureMemory().ToString(), 25);
+
+            DrawDiagnosticLabel("--- {0} --------------", "RENDERING", 25);
+            DrawDiagnosticLabel("Draw Calls: {0}", GetCurrentDrawCalls().ToString(), 15);
+            DrawDiagnosticLabel("Shadow Casters: {0}", GetCurrentShadowCasters().ToString(), 15);
+            DrawDiagnosticLabel("Triangle Count: {0}", GetCurrentTriangles().ToString(), 25);
+
+            DrawDiagnosticLabel("--- {0} --------------", "RENDERING", 25);
+            DrawDiagnosticLabel("Draw Calls: {0}", GetCurrentDrawCalls().ToString(), 15);
+            DrawDiagnosticLabel("Shadow Casters: {0}", GetCurrentShadowCasters().ToString(), 15);
+            DrawDiagnosticLabel("Triangle Count: {0}", GetCurrentTriangles().ToString(), 15);
+        }
+
+        private void DrawDiagnosticLabel(string labelFormat, string labelValue, int incremental)
+        {
+            GUI.Label(m_rectDiagnosticsLabel, string.Format(labelFormat, labelValue), m_labelStyle);
+            m_rectDiagnosticsLabel.y += incremental;
+        }
+
         private void SetMatrix()
         {
             Vector3 scale = new Vector3 (Screen.width / nativeSize.x, Screen.height / nativeSize.y, 1.0f);
@@ -453,9 +282,20 @@ namespace core.modules
             GUI.matrix = currentMatrix;
         }
 
+        public override void UpdateModule()
+        {
+            UpdateDiagnostics();
+        }
+
         public override void OnGUI()
         {
+            SetMatrix();
+
+            DrawDiagnostics();
+
             DrawDebugMenu();
+
+            ResetMatrix();
         }
 
         private void ExecuteExternalCallBack(string _command)
