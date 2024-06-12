@@ -6,7 +6,7 @@ using core.gameplay;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Unity.Plastic.Newtonsoft.Json;
+using Newtonsoft.Json;
 using static core.GameManager;
 using static core.IOController;
 

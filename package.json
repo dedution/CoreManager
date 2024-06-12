@@ -1,7 +1,7 @@
 {
   "name": "com.dedution.coremanager",
   "displayName": "CoreManager",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "unity": "2019.3",
   "description": "Core Systems for debugging and game handling",
   "keywords": [
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "com.unity.addressables": "1.21.19",
-    "com.unity.inputsystem": "1.6.3"
+    "com.unity.inputsystem": "1.6.3",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   }
 }

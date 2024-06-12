@@ -11,9 +11,13 @@ using UnityEditor.SceneManagement;
 // This is a fail safe to disable gameobjects that are supposed to be activated over time
 class SceneOptimizer : IPreprocessBuildWithReport
 {
+    public bool useOptimizer = false;
     public int callbackOrder { get { return 0; } }
     public void OnPreprocessBuild(BuildReport report)
     {
+        if(!useOptimizer)
+            return;
+            
         // Recheck scenes and disable necessary gameobjects for timed activation
         foreach (var sceneGUID in AssetDatabase.FindAssets("t:Scene", new string[] { "Assets" }))
         {
