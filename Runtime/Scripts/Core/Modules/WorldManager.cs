@@ -9,16 +9,12 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using core.tasks;
 
 namespace core.modules
 {
     // Using Addressables cause it handles memory dynamicly. Theres no need for a forced resource cleanup that freezes the main thread
-    public enum WLoaderTaskTypes
-    {
-        Load,
-        Unload
-    }
-
+ 
     public enum WLoaderChunkStates
     {
         Unloaded,
@@ -27,22 +23,7 @@ namespace core.modules
         Unloading
     }
 
-    public abstract class WLoaderTask
-    {
-        public WLoaderTaskTypes taskType;
-
-        // Make this function async
-        public async virtual void Execute(Action onComplete)
-        {
-            // Call task completion
-            if (onComplete != null)
-                onComplete();
-
-            await Task.Yield();
-        }
-    }
-
-    public class WLoaderTaskLoad : WLoaderTask
+    public class WLoaderTaskLoad : BaseTask
     {
         public WLoaderTaskLoad()
         { }
@@ -84,7 +65,7 @@ namespace core.modules
         }
     }
 
-    public class WLoaderTaskUnload : WLoaderTask
+    public class WLoaderTaskUnload : BaseTask
     {
         public WLoaderTaskUnload()
         { }
@@ -130,12 +111,23 @@ namespace core.modules
         public bool preloadCollisions = false;
     }
 
+    [System.Serializable]
+    public class WorldConfig
+    {
+        // Key is basically an alias for the loading
+        // Values are the scene pieces we want to load
+        public Dictionary<string,string[]> Areas;
+    }
+
     // TODO
     // Handling of world data (Data to stream and load, light configuration, optimizations and etc)
     public class WorldManager : BaseModule
     {
-        private Queue<WLoaderTask> wLoaderTasks = new Queue<WLoaderTask>();
-        private bool wLoaderIsBusy = false;
+        // Data loaded from json
+        // Defines the pieces of the world and how they are loaded
+        private WorldConfig worldConfig;
+        private Queue<BaseTask> loaderTasks = new Queue<BaseTask>();
+        private bool LoaderIsBusy = false;
 
         public override void onInitialize()
         {
@@ -145,17 +137,17 @@ namespace core.modules
 
         private void onTaskComplete()
         {
-            wLoaderIsBusy = false;
+            LoaderIsBusy = false;
         }
 
         public override void UpdateModule()
         {
-            //Handling of task queue
-            if (wLoaderTasks.Count > 0 && !wLoaderIsBusy)
+            // Handling of task queue
+            if (loaderTasks.Count > 0 && !LoaderIsBusy)
             {
-                WLoaderTask nextTask = wLoaderTasks.Dequeue();
+                BaseTask nextTask = loaderTasks.Dequeue();
                 nextTask.Execute(onTaskComplete);
-                wLoaderIsBusy = true;
+                LoaderIsBusy = true;
             }
         }
     }
