@@ -24,39 +24,30 @@ namespace core.modules
 
     public class WLoaderTaskLoad : BaseTask
     {
-        public WLoaderTaskLoad()
-        { }
+        public WLoaderTaskLoad(LevelChunk _chunk)
+        { 
+            m_Chunk = _chunk;
+        }
 
         public LevelChunk m_Chunk;
 
         public async override void Execute(Action onComplete)
         {
-            // if (m_Chunk.m_currentState == WLoaderChunkStates.Unloaded)
-            // {
-            //     m_Chunk.m_currentState = WLoaderChunkStates.Loading;
+            if (m_Chunk.currentChunkState == WLoaderChunkStates.Unloaded)
+            {
+                m_Chunk.currentChunkState = WLoaderChunkStates.Loading;
 
-            //     for (int i = 0; i < m_Chunk.m_pieces.Length; i++)
-            //     {
-            //         var _piece = m_Chunk.m_pieces[i];
+                AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(m_Chunk.chunkID, LoadSceneMode.Additive, false);
+                m_Chunk.sceneHandle = handle;
 
-            //         AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(_piece.pieceID, LoadSceneMode.Additive, false);
-            //         _piece.sceneHandle = handle;
+                await handle.Task;
 
-            //         await handle.Task;
+                // One way to handle manual scene activation.
+                if (handle.Status == AsyncOperationStatus.Succeeded)
+                    handle.Result.ActivateAsync();
 
-            //         // One way to handle manual scene activation.
-            //         if (handle.Status == AsyncOperationStatus.Succeeded)
-            //             handle.Result.ActivateAsync();
-
-            //         // Start Optimization process
-            //         // Find the optimizer at the root and make him start the timed activations
-            //         // Is it more performant to use the EventManager to trigger the optimizer instead of fetching the scene objects and triggering from there
-            //         // GameObject [] rootObjects = handle.Result.Scene.GetRootGameObjects();
-            //         // Maybe fetch the optimizer and wait for it to be finished here
-            //     }
-
-            //     m_Chunk.m_currentState = WLoaderChunkStates.Loaded;
-            // }
+                m_Chunk.currentChunkState = WLoaderChunkStates.Loaded;
+            }
 
             // call base to complete task
             base.Execute(onComplete);
@@ -65,55 +56,46 @@ namespace core.modules
 
     public class WLoaderTaskUnload : BaseTask
     {
-        public WLoaderTaskUnload()
-        { }
+        public WLoaderTaskUnload(LevelChunk _chunk)
+        { 
+            m_Chunk = _chunk;
+        }
 
-        // Chunk to unload
         public LevelChunk m_Chunk;
 
         public async override void Execute(Action onComplete)
         {
-            // m_Chunk.m_currentState = WLoaderChunkStates.Unloading;
+            m_Chunk.currentChunkState = WLoaderChunkStates.Unloading;
+            
+            AsyncOperationHandle<SceneInstance> handle = Addressables.UnloadSceneAsync(m_Chunk.sceneHandle, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
 
-            // for (int i = 0; i < m_Chunk.m_pieces.Length; i++)
-            // {
-            //     var _piece = m_Chunk.m_pieces[i];
-            //     AsyncOperationHandle<SceneInstance> handle = Addressables.UnloadSceneAsync(_piece.sceneHandle, UnloadSceneOptions.None);
+            await handle.Task;
 
-            //     await handle.Task;
-
-            //     // One way to handle manual scene activation.
-            //     if (handle.Status == AsyncOperationStatus.Succeeded)
-            //         handle.Result.ActivateAsync();
-            // }
-
-            // m_Chunk.m_currentState = WLoaderChunkStates.Unloaded;
+            // Maybe call an adressables free from memory handle?
+            m_Chunk.currentChunkState = WLoaderChunkStates.Unloaded;
             base.Execute(onComplete);
         }
     }
 
-    public struct WLoaderChunk
-    {
-        public string pieceID;
-        public AsyncOperationHandle<SceneInstance> sceneHandle;
-
-        public WLoaderChunk(string pieceID)
-        {
-            this.pieceID = pieceID;
-            sceneHandle = new AsyncOperationHandle<SceneInstance>();
-        }
-    }
-    
     [System.Serializable]
     public struct LevelChunk
     {
         public string chunkID;
-        public bool isOptimization;
+        public bool usesOptimization;
+        public int activationsPerFrame;
 
-        public LevelChunk(string chunkID, bool isOptimization)
+        // Some variables and objects are not needed for serialization
+        // Property to get this?
+        public WLoaderChunkStates currentChunkState;
+        public AsyncOperationHandle<SceneInstance> sceneHandle;
+
+        public LevelChunk(string chunkID, bool usesOptimization = false, int activationsPerFrame = 3)
         {
             this.chunkID = chunkID; 
-            this.isOptimization = isOptimization;
+            this.usesOptimization = usesOptimization;
+            this.activationsPerFrame = activationsPerFrame;
+            sceneHandle = new AsyncOperationHandle<SceneInstance>();
+            currentChunkState = WLoaderChunkStates.Unloaded;
         }
     }
 
@@ -134,20 +116,40 @@ namespace core.modules
     public class WorldConfig
     {
         public List<WorldLevel> Levels = new List<WorldLevel>();
+
+        // Probably unnecessary if checking for bad data on task creation
+        public bool HasLevel(string levelID)
+        {
+            bool _hasLevel = Levels.Where(level => level.levelID == levelID).Count() > 0;
+            return _hasLevel;
+        }
+
+        public LevelChunk GetChunk(string levelID, string chunkID)
+        {
+            WorldLevel _level = Levels.Where(level => level.levelID == levelID).ElementAt(0);
+            return _level.levelChunks.Where(chunk => chunk.chunkID == chunkID).ElementAt(0);
+        }
+
+        public List<string> GetLevelChunkIDs(string levelID)
+        {
+            List<string> _chunks = new List<string>();
+
+            WorldLevel _level = Levels.Where(level => level.levelID == levelID).ElementAt(0);
+            _level.levelChunks.ForEach(chunk => _chunks.Add(chunk.chunkID));
+            
+            return _chunks;
+        }
     }
 
     // Handling of world data (Data to stream and load, light configuration, optimizations and etc)
     public class WorldManager : BaseModule
     {
-        private Dictionary<string, WLoaderChunk> worldLoaderData = new Dictionary<string, WLoaderChunk>();
         private Queue<BaseTask> loaderTasks = new Queue<BaseTask>();
         private bool LoaderIsBusy = false;
+        private WorldConfig worldConfigData = new WorldConfig();
 
         public override void onInitialize()
         {
-            // Prepare the chunks and pieces necessary for the system to handle
-            // wLoaderTasks.Enqueue(new WLoaderTaskLoad());
-            // WriteTestConfig();
             LoadWorldConfig();
         }
 
@@ -180,19 +182,39 @@ namespace core.modules
 
         private void onWorldConfigLoaded(WorldConfig _data)
         {
-            ParseWorldDataToPieces(_data);
+            worldConfigData = _data;
         }
 
-        private void ParseWorldDataToPieces(WorldConfig _worldData)
+        public void LoadChunk(string levelID, string chunkID)
         {
-            // Careful with this, can contain asset handlers
-            worldLoaderData.Clear();
+            if(!worldConfigData.HasLevel(levelID) && chunkID != "")
+                return;
 
-            foreach(var level in _worldData.Levels) {
-                foreach(var chunk in level.levelChunks) {
-                    worldLoaderData.Add(level.levelID, new WLoaderChunk(chunk.chunkID));
-                }
-            }
+            // Adds a load task for the target chunk
+            LevelChunk _chunk = worldConfigData.GetChunk(levelID, chunkID);
+            loaderTasks.Enqueue(new WLoaderTaskLoad(_chunk));
+        }
+
+        public void UnloadChunk(string levelID, string chunkID)
+        {
+            if(!worldConfigData.HasLevel(levelID) && chunkID != "")
+                return;
+
+            // Adds an unload task for the target chunk
+            LevelChunk _chunk = worldConfigData.GetChunk(levelID, chunkID);
+            loaderTasks.Enqueue(new WLoaderTaskUnload(_chunk));
+        }
+
+        public void LoadLevel(string levelID)
+        {
+            // Creates loading tasks for all chunks associated with a level
+            worldConfigData.GetLevelChunkIDs(levelID).ForEach(chunkID => LoadChunk(levelID, chunkID));
+        }
+
+        public void UnloadLevel(string levelID)
+        {
+            // Creates unloading tasks for all loaded chunks associated with a level
+            worldConfigData.GetLevelChunkIDs(levelID).ForEach(chunkID => UnloadChunk(levelID, chunkID));
         }
 
         public override void UpdateModule()
