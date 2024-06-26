@@ -190,8 +190,11 @@ namespace core.modules
         {
             worldConfigData = _data;
 
-            if(worldConfigData.GetLevelCount() > 0)
+            if(worldConfigData.GetLevelCount() > 0) 
+            {
                 LoaderInit = true;
+                UpdateTasks();
+            }
         }
 
         private void onTaskCompleted()

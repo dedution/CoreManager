@@ -25,6 +25,7 @@ namespace core
         private Dictionary<Type, BaseModule> activeModules = new Dictionary<Type, BaseModule>();
         private ModuleConfig ModulesConfiguration = new ModuleConfig();
         private bool isConfigurationLoaded = false;
+        public bool isReady = false;
         private bool useJSONAutoSave = true;
         private string MODULECONFIGPATH;
         private string CONFIGFILENAME = "moduleconfig.json";
@@ -91,6 +92,7 @@ namespace core
             else
                 InitAllModules();
 
+            isReady = true;
             Debug.Log(">> Modules Loaded! (" + activeModules.Count + ")");
         }
 
