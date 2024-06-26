@@ -142,7 +142,7 @@ namespace core.modules
         public void SaveSystem_Game_Save()
         {
             // Save data to file
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", true } }); });
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", true } }); }, true);
             string _Path = GetSavePath();
 
             Debug.Log("Saving data to: " + _Path);
@@ -156,7 +156,7 @@ namespace core.modules
         public void SaveSystem_Game_Load()
         {
             // Load and process data from file
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", true } }); });
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", true } }); }, true);
 
             string _Path = GetSavePath();
 
@@ -178,14 +178,14 @@ namespace core.modules
         private void onSaveDataSuccess()
         {
             Debug.Log("SAVE SUCESSFULL!");
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", false } }); });
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", false } }); }, true);
         }
 
         private void onLoadDataSuccess(GameSaveData _data)
         {
             Debug.Log("LOAD SUCESSFULL!");
             gameSaveData = _data;
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", false } }); });
+            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", false } }); }, true);
         }
     }
 }

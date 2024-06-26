@@ -73,14 +73,14 @@ namespace core.modules
                     {
                         currentInputMap = _ref.GetCurrentMap();
                         _ref.SwitchCurrentMap("UI");
-                    });
+                    }, true);
                 }
                 else
                 {
                     ActOnModule((InputManager _ref) =>
                     {
                         _ref.SwitchCurrentMap(currentInputMap);
-                    });
+                    }, true);
                 }
             }
         }
@@ -102,7 +102,7 @@ namespace core.modules
                 {
                     ToggleDebugMenu();
                 });
-            });
+            }, true);
             
             // Attach opening menu logic to action map of UI
             ActOnModule((InputManager _ref) =>
@@ -111,7 +111,7 @@ namespace core.modules
                 {
                     ToggleDebugMenu();
                 }, "UI");
-            });
+            }, true);
 
             // Initialize the diagnostics logic
             InitDiagnostics();

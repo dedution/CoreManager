@@ -66,13 +66,14 @@ namespace core
         // Safer way to use logic that interacts with modules without worrying if module even exists
         // Example how to use:
         // ActOnModule((ModuleName _ref) => {_ref.Hello();});
-        public static void ActOnModule<T>(Action<T> _logic)
+        public static void ActOnModule<T>(Action<T> _logic, bool forced = false)
         {
-            if(!Instance.moduleController.isReady) 
+            if(!Instance.moduleController.isReady && !forced) 
             {
                 Debug.LogError("Module System [" + typeof(T).Name + "] is not yet initialized but something is trying to access it!");
                 return;
             }
+            
             T _module = GetLoadedModule<T>();
 
             if(!ReferenceEquals(_logic, null) && !ReferenceEquals(_module, null))
