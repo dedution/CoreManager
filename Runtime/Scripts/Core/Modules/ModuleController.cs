@@ -40,7 +40,9 @@ namespace core
                 Directory.CreateDirectory(MODULECONFIGPATH);
 
             string _modulePath = Path.Combine(MODULECONFIGPATH, CONFIGFILENAME);
-            IOController.ReadJSONFromFile<ModuleConfig>(_modulePath, false, ProcessConfig);
+            
+            if(File.Exists(_modulePath))
+                IOController.ReadJSONFromFile<ModuleConfig>(_modulePath, false, ProcessConfig);
         }
 
         public void SaveCurrentConfig()
@@ -51,7 +53,7 @@ namespace core
                 ModulesConfiguration.Modules.Add(_type.ToString());
 
             if (!File.Exists(_modulePath))
-                IOController.WriteJSONToFile<ModuleConfig>(_modulePath, ModulesConfiguration, true, false);
+                IOController.WriteJSONToFile(_modulePath, ModulesConfiguration, true, false);
         }
 
         private void ProcessConfig(ModuleConfig _data)
