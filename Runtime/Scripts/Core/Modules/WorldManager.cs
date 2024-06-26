@@ -35,6 +35,7 @@ namespace core.modules
         {
             if (m_Chunk.ChunkState == WLoaderChunkStates.Unloaded)
             {
+                Debug.Log("Started loading task!");
                 m_Chunk.ChunkState = WLoaderChunkStates.Loading;
 
                 AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(m_Chunk.chunkID, LoadSceneMode.Additive, false);
@@ -47,6 +48,7 @@ namespace core.modules
                     handle.Result.ActivateAsync();
 
                 m_Chunk.ChunkState = WLoaderChunkStates.Loaded;
+                Debug.Log("Task loaded sucessfully!");
             }
         }
     }
@@ -70,6 +72,8 @@ namespace core.modules
 
             // Maybe call an adressables free from memory handle?
             m_Chunk.ChunkState = WLoaderChunkStates.Unloaded;
+            
+            Debug.Log("Task unloaded sucessfully!");
         }
     }
 
@@ -192,6 +196,7 @@ namespace core.modules
 
             if(worldConfigData.GetLevelCount() > 0) 
             {
+                Debug.Log("World Manager config loaded!");
                 LoaderInit = true;
                 UpdateTasks();
             }
@@ -211,6 +216,8 @@ namespace core.modules
             // Adds a load task for the target chunk
             LevelChunk _chunk = worldConfigData.GetChunk(levelID, chunkID);
             PushNewTask(new WLoaderTaskLoad(_chunk));
+            
+            Debug.Log("Added Chunk [" + chunkID + "] to the load queue!");
         }
 
         public void UnloadChunk(string levelID, string chunkID)
@@ -221,6 +228,8 @@ namespace core.modules
             // Adds an unload task for the target chunk
             LevelChunk _chunk = worldConfigData.GetChunk(levelID, chunkID);
             PushNewTask(new WLoaderTaskUnload(_chunk));
+
+            Debug.Log("Added Chunk [" + chunkID + "] to the unload queue!");
         }
 
         public void LoadLevel(string levelID)
@@ -251,12 +260,9 @@ namespace core.modules
                 LoaderIsBusy = true;
                 BaseTask nextTask = loaderTasks.Dequeue();
                 nextTask.Execute(onTaskCompleted).Start();
-            }
-        }
 
-        public override void UpdateModule()
-        {
-            // UpdateTasks();
+                Debug.Log("New task in execution!");
+            }
         }
     }
 }
