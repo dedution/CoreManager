@@ -31,11 +31,11 @@ namespace core.modules
 
         public LevelChunk m_Chunk;
 
-        public async override void Execute(Action onComplete)
+        public async override Task onExecute()
         {
-            if (m_Chunk.currentChunkState == WLoaderChunkStates.Unloaded)
+            if (m_Chunk.ChunkState == WLoaderChunkStates.Unloaded)
             {
-                m_Chunk.currentChunkState = WLoaderChunkStates.Loading;
+                m_Chunk.ChunkState = WLoaderChunkStates.Loading;
 
                 AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(m_Chunk.chunkID, LoadSceneMode.Additive, false);
                 m_Chunk.sceneHandle = handle;
@@ -46,11 +46,8 @@ namespace core.modules
                 if (handle.Status == AsyncOperationStatus.Succeeded)
                     handle.Result.ActivateAsync();
 
-                m_Chunk.currentChunkState = WLoaderChunkStates.Loaded;
+                m_Chunk.ChunkState = WLoaderChunkStates.Loaded;
             }
-
-            // call base to complete task
-            base.Execute(onComplete);
         }
     }
 
@@ -63,17 +60,16 @@ namespace core.modules
 
         public LevelChunk m_Chunk;
 
-        public async override void Execute(Action onComplete)
+        public async override Task onExecute()
         {
-            m_Chunk.currentChunkState = WLoaderChunkStates.Unloading;
+            m_Chunk.ChunkState = WLoaderChunkStates.Unloading;
             
             AsyncOperationHandle<SceneInstance> handle = Addressables.UnloadSceneAsync(m_Chunk.sceneHandle, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
 
             await handle.Task;
 
             // Maybe call an adressables free from memory handle?
-            m_Chunk.currentChunkState = WLoaderChunkStates.Unloaded;
-            base.Execute(onComplete);
+            m_Chunk.ChunkState = WLoaderChunkStates.Unloaded;
         }
     }
 
@@ -84,9 +80,14 @@ namespace core.modules
         public bool usesOptimization;
         public int activationsPerFrame;
 
-        // Some variables and objects are not needed for serialization
-        // Property to get this?
-        public WLoaderChunkStates currentChunkState;
+        // Private and runtime only
+        private WLoaderChunkStates currentChunkState;
+        public WLoaderChunkStates ChunkState
+        {
+            get { return currentChunkState; }
+            set { currentChunkState = value; }
+        }
+
         public AsyncOperationHandle<SceneInstance> sceneHandle;
 
         public LevelChunk(string chunkID, bool usesOptimization = false, int activationsPerFrame = 3)
@@ -124,6 +125,11 @@ namespace core.modules
             return _hasLevel;
         }
 
+        public int GetLevelCount()
+        {
+            return Levels.Count;
+        }
+
         public LevelChunk GetChunk(string levelID, string chunkID)
         {
             WorldLevel _level = Levels.Where(level => level.levelID == levelID).ElementAt(0);
@@ -145,15 +151,17 @@ namespace core.modules
     public class WorldManager : BaseModule
     {
         private Queue<BaseTask> loaderTasks = new Queue<BaseTask>();
+        private bool LoaderInit = false;
         private bool LoaderIsBusy = false;
         private WorldConfig worldConfigData = new WorldConfig();
 
         public override void onInitialize()
         {
+            // Load levels setup. This system won't work if config is missing
             LoadWorldConfig();
         }
 
-        private void WriteTestConfig()
+        public void WriteTestConfig()
         {
             WorldConfig worldConfigTest = new WorldConfig();
 
@@ -162,11 +170,9 @@ namespace core.modules
             chunks.Add(new LevelChunk("Forest-Chunk-02", false));
             chunks.Add(new LevelChunk("Forest-Chunk-03", false));
 
-            List<WorldLevel> levels = new List<WorldLevel>();
-            levels.Add(new WorldLevel("Forest", chunks));
+            worldConfigTest.Levels.Add(new WorldLevel("Forest", chunks));
             
-            worldConfigTest.Levels = levels;
-            
+            // ASYNC WRITE IN NOT TAKING INTO ACCOUNT OVERRIDING
             string _Path = Path.Combine(Application.streamingAssetsPath, "worldconfig.json");
             IOController.WriteJSONToFile(_Path, worldConfigTest, true, true);
         }
@@ -183,6 +189,15 @@ namespace core.modules
         private void onWorldConfigLoaded(WorldConfig _data)
         {
             worldConfigData = _data;
+
+            if(worldConfigData.GetLevelCount() > 0)
+                LoaderInit = true;
+        }
+
+        private void onTaskCompleted()
+        {
+            LoaderIsBusy = false;
+            UpdateTasks();
         }
 
         public void LoadChunk(string levelID, string chunkID)
@@ -192,7 +207,7 @@ namespace core.modules
 
             // Adds a load task for the target chunk
             LevelChunk _chunk = worldConfigData.GetChunk(levelID, chunkID);
-            loaderTasks.Enqueue(new WLoaderTaskLoad(_chunk));
+            PushNewTask(new WLoaderTaskLoad(_chunk));
         }
 
         public void UnloadChunk(string levelID, string chunkID)
@@ -202,7 +217,7 @@ namespace core.modules
 
             // Adds an unload task for the target chunk
             LevelChunk _chunk = worldConfigData.GetChunk(levelID, chunkID);
-            loaderTasks.Enqueue(new WLoaderTaskUnload(_chunk));
+            PushNewTask(new WLoaderTaskUnload(_chunk));
         }
 
         public void LoadLevel(string levelID)
@@ -217,15 +232,28 @@ namespace core.modules
             worldConfigData.GetLevelChunkIDs(levelID).ForEach(chunkID => UnloadChunk(levelID, chunkID));
         }
 
-        public override void UpdateModule()
+        private void PushNewTask(BaseTask newTask)
+        {
+            if(newTask != null)
+                loaderTasks.Enqueue(newTask);
+
+            UpdateTasks();
+        }
+
+        private void UpdateTasks()
         {
             // Handling of task queue
-            if (loaderTasks.Count > 0 && !LoaderIsBusy)
+            if (LoaderInit && loaderTasks.Count > 0 && !LoaderIsBusy)
             {
-                BaseTask nextTask = loaderTasks.Dequeue();
-                nextTask.Execute(()=> { LoaderIsBusy = false; });
                 LoaderIsBusy = true;
+                BaseTask nextTask = loaderTasks.Dequeue();
+                nextTask.Execute(onTaskCompleted).Start();
             }
+        }
+
+        public override void UpdateModule()
+        {
+            // UpdateTasks();
         }
     }
 }

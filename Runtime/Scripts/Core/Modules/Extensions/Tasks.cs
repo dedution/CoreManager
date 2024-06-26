@@ -10,14 +10,25 @@ namespace core.tasks {
         public TaskTypes taskType;
 
         // Make this function async
-        public async virtual void Execute(Action onComplete)
+        public async Task Execute(Action onComplete)
         {
-            // Call task completion
-            if (onComplete != null)
-                onComplete();
+            await onExecute();
 
+            await Task.Run(() =>
+            {
+                // Call task completion
+                if (onComplete != null)
+                    onComplete();
+            });
+            
             await Task.Yield();
         }
+
+        public async virtual Task onExecute()
+        {
+            await Task.Yield();
+        }
+
     }
 
     public enum TaskTypes
