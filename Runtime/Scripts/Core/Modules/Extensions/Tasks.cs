@@ -14,13 +14,10 @@ namespace core.tasks {
         {
             await onExecute();
 
-            await Task.Run(() =>
-            {
-                // Call task completion
-                if (onComplete != null)
-                    onComplete();
-            });
-            
+            // Call task completion
+            if (onComplete != null)
+                onComplete();
+
             await Task.Yield();
         }
 
@@ -28,7 +25,6 @@ namespace core.tasks {
         {
             await Task.Yield();
         }
-
     }
 
     public enum TaskTypes

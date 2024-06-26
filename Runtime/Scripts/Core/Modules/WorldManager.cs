@@ -187,7 +187,7 @@ namespace core.modules
 
             // Only load the config file if it exists
             if(File.Exists(_Path))
-                IOController.ReadJSONFromFile<WorldConfig>(_Path, true, onWorldConfigLoaded);
+                IOController.ReadJSONFromFile<WorldConfig>(_Path, false, onWorldConfigLoaded);
         }
 
         private void onWorldConfigLoaded(WorldConfig _data)
@@ -210,14 +210,14 @@ namespace core.modules
 
         public void LoadChunk(string levelID, string chunkID)
         {
+            Debug.Log("Added Chunk [" + chunkID + "] to the load queue!");
+
             if(!worldConfigData.HasLevel(levelID))
                 return;
 
             // Adds a load task for the target chunk
             LevelChunk _chunk = worldConfigData.GetChunk(levelID, chunkID);
             PushNewTask(new WLoaderTaskLoad(_chunk));
-            
-            Debug.Log("Added Chunk [" + chunkID + "] to the load queue!");
         }
 
         public void UnloadChunk(string levelID, string chunkID)
@@ -259,10 +259,16 @@ namespace core.modules
             {
                 LoaderIsBusy = true;
                 BaseTask nextTask = loaderTasks.Dequeue();
-                nextTask.Execute(onTaskCompleted).Start();
-
+                
+                TaskCaller(nextTask);
                 Debug.Log("New task in execution!");
             }
         }
+
+        private async void TaskCaller(BaseTask task)
+        {
+            await task.Execute(onTaskCompleted);
+        }
+
     }
 }
