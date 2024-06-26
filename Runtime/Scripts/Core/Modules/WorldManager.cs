@@ -210,7 +210,7 @@ namespace core.modules
 
         public void LoadChunk(string levelID, string chunkID)
         {
-            if(!worldConfigData.HasLevel(levelID) && chunkID != "")
+            if(!worldConfigData.HasLevel(levelID))
                 return;
 
             // Adds a load task for the target chunk
@@ -222,7 +222,7 @@ namespace core.modules
 
         public void UnloadChunk(string levelID, string chunkID)
         {
-            if(!worldConfigData.HasLevel(levelID) && chunkID != "")
+            if(!worldConfigData.HasLevel(levelID))
                 return;
 
             // Adds an unload task for the target chunk
