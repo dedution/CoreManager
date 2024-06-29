@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using core.tasks;
 using System.IO;
+using log4net.Core;
 
 namespace core.modules
 {
@@ -149,6 +150,18 @@ namespace core.modules
             
             return _chunks;
         }
+
+        public List<string> GetLevelIDs()
+        {
+            List<string> _levels = new List<string>();
+
+            foreach(WorldLevel _lvl in Levels) 
+            {
+                _levels.Add(_lvl.levelID);
+            }
+
+            return _levels;
+        }
     }
 
     // Handling of world data (Data to stream and load, light configuration, optimizations and etc)
@@ -158,6 +171,7 @@ namespace core.modules
         private bool LoaderInit = false;
         private bool LoaderIsBusy = false;
         private WorldConfig worldConfigData = new WorldConfig();
+        private GUIStyle m_labelStyle = new GUIStyle();
 
         public override void onInitialize()
         {
@@ -270,5 +284,60 @@ namespace core.modules
             await task.Execute(onTaskCompleted);
         }
 
+        public override void OnGUI()
+        {
+            // Write debug information here
+            // Levels available
+            // Chunks for each level
+            // Are they loaded or not?
+            // Are they loading?
+            // Percentage
+            if(!LoaderInit)
+                return;
+            
+            float baseX = 50, baseY = 120;
+
+            SetUIMatrix();
+
+            var levelIDS = worldConfigData.GetLevelIDs();
+
+            for(int i = 0; i < levelIDS.Count; i++)
+            {
+                m_labelStyle.normal.textColor = Color.white;
+                m_labelStyle.alignment = TextAnchor.MiddleLeft;
+                
+                var chunkIDs = worldConfigData.GetLevelChunkIDs(levelIDS[i]);
+
+                // Draw level name
+                GUI.Label(new Rect(baseX, baseY, 150, 25), levelIDS[i], m_labelStyle);
+
+                baseY += 15;
+
+                GUI.Label(new Rect(baseX + levelIDS[i].Length, baseY, 150, 25), "|", m_labelStyle);
+                baseY += 15;
+
+                for(int j = 0; j < chunkIDs.Count; j++)
+                {
+                    m_labelStyle.normal.textColor = Color.white;
+                    
+                    // Draw Chunk state
+                    var baseOffsetX = baseX + levelIDS[i].Length;
+
+                    GUI.Label(new Rect(baseOffsetX + 5, baseY, 150, 25), "→", m_labelStyle);
+                    GUI.Label(new Rect(baseOffsetX + 25, baseY, 150, 25), chunkIDs[j], m_labelStyle);
+                    
+                    //m_labelStyle.fontStyle = FontStyle.Bold;
+                    m_labelStyle.normal.textColor = Color.green;
+
+                    GUI.Label(new Rect(baseOffsetX + (chunkIDs[j].Length * 8) , baseY, 150, 25), "( LOADED! )", m_labelStyle);
+
+                    baseY += 15;
+                }
+
+                baseY += 15;
+            }
+
+            ResetUIMatrix();
+        }
     }
 }

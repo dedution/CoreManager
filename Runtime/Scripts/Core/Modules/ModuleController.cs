@@ -26,7 +26,7 @@ namespace core
         private ModuleConfig ModulesConfiguration = new ModuleConfig();
         private bool isConfigurationLoaded = false;
         public bool isReady = false;
-        private bool useJSONAutoSave = true;
+        private bool useJSONAutoSave = false;
         private string MODULECONFIGPATH;
         private string CONFIGFILENAME = "moduleconfig.json";
 

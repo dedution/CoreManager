@@ -20,7 +20,6 @@ namespace core.modules
         // Separate classes and interfaces into a new source file and namespace
         // Slides and toggle needs an updating function that is called every time the menu is opened. this update needs to come from a delegate 
 
-        private Matrix4x4 currentMatrix;
         private bool m_isActive = false;
 
         private Rect m_rectDiagnosticsLabel = new Rect(10, 35, 150, 20);
@@ -85,14 +84,10 @@ namespace core.modules
             }
         }
         
-        // Default size of debug manager
-        private Vector2 nativeSize = new Vector2(1280, 720);
-
         private static GUIStyle m_labelStyle = new GUIStyle();
 
         public override void onInitialize()
         {
-            currentMatrix = GUI.matrix;
             LoadDebugMenuStyle();
 
             // Attach opening menu logic to action map of Player
@@ -271,17 +266,6 @@ namespace core.modules
             m_rectDiagnosticsLabel.y += incremental;
         }
 
-        private void SetMatrix()
-        {
-            Vector3 scale = new Vector3 (Screen.width / nativeSize.x, Screen.height / nativeSize.y, 1.0f);
-            GUI.matrix = Matrix4x4.TRS (new Vector3(0, 0, 0), Quaternion.identity, scale);
-        }
-
-        private void ResetMatrix()
-        {
-            GUI.matrix = currentMatrix;
-        }
-
         public override void UpdateModule()
         {
             UpdateDiagnostics();
@@ -289,13 +273,13 @@ namespace core.modules
 
         public override void OnGUI()
         {
-            SetMatrix();
+            SetUIMatrix();
 
             DrawDiagnostics();
 
             DrawDebugMenu();
 
-            ResetMatrix();
+            ResetUIMatrix();
         }
 
         private void ExecuteExternalCallBack(string _command)
