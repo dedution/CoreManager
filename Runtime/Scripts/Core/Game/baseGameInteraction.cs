@@ -22,5 +22,15 @@ namespace core.gameplay
             else
                 return transform.position;
         }
+
+        public virtual void onHighlight(bool state)
+        {
+
+        }
+
+        public virtual void onEnterRange(bool state)
+        {
+            
+        }
     }
 }
