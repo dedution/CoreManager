@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using core.modules;
+using core.gameplay;
 
 namespace core
 {
@@ -16,6 +17,16 @@ namespace core
         private ModuleController moduleController = new ModuleController();
         private bool m_gameManagerWasInit = false;
 
+        // Player stays on the side
+        private static baseGameActor _playerReference;
+        public static baseGameActor m_PlayerReference
+        {
+            get { return _playerReference; }
+            set { _playerReference = value; }
+        }
+
+        private static bool m_GamePaused = false;
+        
         private GameManager()
         {
             //Initialize mono dummy gameobject
@@ -68,31 +79,55 @@ namespace core
         // ActOnModule((ModuleName _ref) => {_ref.Hello();});
         public static void ActOnModule<T>(Action<T> _logic, bool forced = false)
         {
-            if(!Instance.moduleController.isReady && !forced) 
+            if (!Instance.moduleController.isReady && !forced)
             {
                 Debug.LogError("Module System [" + typeof(T).Name + "] is not yet initialized but something is trying to access it!");
                 return;
             }
-            
+
             T _module = GetLoadedModule<T>();
 
-            if(!ReferenceEquals(_logic, null) && !ReferenceEquals(_module, null))
+            if (!ReferenceEquals(_logic, null) && !ReferenceEquals(_module, null))
                 _logic(_module);
         }
 
-        // Returns the state of pause
-        public static bool Game_SetPauseState(bool state)
+        public static bool Game_CanPause()
         {
-            // Can we pause the game?
-            // Do logic for freezing and unfreezing time
-            // Trigger pause event for whoever is listening
+            return true;
+        }
+        
+        // Returns the state of pause
+        public static void Game_SetPauseState(bool state)
+        {
+            if(m_GamePaused == state && Game_CanPause())
+                return;
 
-            return Game_GetPauseState();
+            // When can we pause the game?
+            // Trigger event announcing the pause state change 
+            ActOnModule((EventManager _ref) =>
+            {
+                _ref.TriggerEvent("gamePause", new Dictionary<string, object> { { "pause", state } });
+            });
+
+            Game_SetGameSpeed(state ? 0f : 1f);
+
+            m_GamePaused = state;
         }
 
         public static bool Game_GetPauseState()
         {
-            return false;
+            return m_GamePaused;
+        }
+        
+        public static void Game_SetGameSpeed(float _targetSpeed)
+        {
+            Time.timeScale = _targetSpeed;
+            Time.fixedDeltaTime = 0.02F * Time.timeScale;
+        }
+
+        public static float Game_GetGameSpeed()
+        {
+            return Time.timeScale;
         }
     }
 }
