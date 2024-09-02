@@ -21,7 +21,7 @@ namespace core.modules
             m_GameCamera = _mainCamera;
         }
 
-        public override void UpdateModule()
+        public override void UpdateModule(float deltaTime, float unscaledDeltaTime)
         {
             if (m_wasInit && m_isEnabled)
                 GridWorld_Update();

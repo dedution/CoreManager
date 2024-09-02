@@ -24,7 +24,7 @@ namespace core.modules
         {
         }
 
-        public virtual void UpdateModule()
+        public virtual void UpdateModule(float deltaTime, float unscaledDeltaTime)
         {   
         }
 

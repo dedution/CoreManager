@@ -9,8 +9,9 @@ namespace core.modules
     public class CoreDummyObject : MonoBehaviour
     {
         public delegate void ModuleUnityCallDelegate();
+        public delegate void ModuleUpdateDelegate(float deltaTime, float unscaledDeltaTime);
         public ModuleUnityCallDelegate unity_GUIDelegate;
-        public ModuleUnityCallDelegate unity_UpdateDelegate;
+        public ModuleUpdateDelegate unity_UpdateDelegate;
 
         private void OnGUI()
         {
@@ -20,9 +21,12 @@ namespace core.modules
 
         private void Update()
         {
+            float deltaTime = Time.deltaTime;
+            float unscaledDeltaTime = Time.unscaledDeltaTime;
+
             // Only update modules through here
             if(!ReferenceEquals(unity_UpdateDelegate, null))
-                unity_UpdateDelegate();
+                unity_UpdateDelegate(deltaTime, unscaledDeltaTime);
         }
     }
 }

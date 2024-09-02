@@ -266,7 +266,7 @@ namespace core.modules
             m_rectDiagnosticsLabel.y += incremental;
         }
 
-        public override void UpdateModule()
+        public override void UpdateModule(float deltaTime, float unscaledDeltaTime)
         {
             UpdateDiagnostics();
         }

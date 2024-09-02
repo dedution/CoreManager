@@ -23,7 +23,7 @@ namespace core.modules
 
         }
 
-        public override void UpdateModule()
+        public override void UpdateModule(float deltaTime, float unscaledDeltaTime)
         {
 
         }

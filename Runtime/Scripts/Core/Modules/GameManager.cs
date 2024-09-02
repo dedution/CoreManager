@@ -99,7 +99,7 @@ namespace core
         // Returns the state of pause
         public static void Game_SetPauseState(bool state)
         {
-            if(m_GamePaused == state && Game_CanPause())
+            if(m_GamePaused == state || !Game_CanPause())
                 return;
 
             // When can we pause the game?

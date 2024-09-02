@@ -87,7 +87,7 @@ namespace core.modules
             m_networkQueue.Enqueue(() => m_networkListener(rawdata));
         }
 
-        public override void UpdateModule()
+        public override void UpdateModule(float deltaTime, float unscaledDeltaTime)
         {
             //Execute Actions from the Network in the Main Thread
             if (m_networkQueue.Count > 0)

@@ -13,7 +13,6 @@ namespace core.modules
         private SubtitleInformer InformSubtitle;
         private float currentSubtitleTimer = 0f;
         private Dictionary<string, float> SubtitleQueue = new Dictionary<string, float>();
-
         private bool Subtitle_Enabled = false;
 
         public override void onInitialize()
@@ -29,7 +28,7 @@ namespace core.modules
             Subtitle_Enabled = (bool)param["SETTINGS_ALLOWSUBTITLES"];
         }
 
-        public override void UpdateModule()
+        public override void UpdateModule(float deltaTime, float unscaledDeltaTime)
         {
             currentSubtitleTimer = currentSubtitleTimer < 0 ? 0 : currentSubtitleTimer - Time.deltaTime;
 

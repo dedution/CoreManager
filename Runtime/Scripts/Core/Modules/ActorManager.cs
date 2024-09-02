@@ -81,7 +81,7 @@ namespace core.modules
             return availableActors.ToArray();
         }
 
-        public override void UpdateModule()
+        public override void UpdateModule(float deltaTime, float unscaledDeltaTime)
         {
             if (!ReferenceEquals(UpdateActors, null))
                 UpdateActors();
