@@ -11,7 +11,6 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using core.tasks;
 using System.IO;
-using log4net.Core;
 
 namespace core.modules
 {
