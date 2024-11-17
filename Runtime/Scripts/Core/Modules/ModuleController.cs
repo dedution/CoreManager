@@ -37,8 +37,9 @@ namespace core
             MODULECONFIGPATH = Path.Combine(Application.streamingAssetsPath, "modules");
 
             // Create streaming assets if missing
-            if (!Directory.Exists(MODULECONFIGPATH))
+            if (!Directory.Exists(MODULECONFIGPATH) && useJSONAutoSave) {
                 Directory.CreateDirectory(MODULECONFIGPATH);
+            }
 
             string _modulePath = Path.Combine(MODULECONFIGPATH, CONFIGFILENAME);
             
