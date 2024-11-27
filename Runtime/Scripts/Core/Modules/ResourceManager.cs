@@ -15,8 +15,6 @@ namespace core.modules
         // This module will also handle the way other modules and game logic creates pools of data
         // This module will work on a queue based system
         // Everything related to writing and reading of files and data will be done through this module
-        // Load and writing and parsing of json data
-        // MOVE File handling into a separate controller available through the gamemanager
 
         public override void onInitialize()
         {

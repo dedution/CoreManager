@@ -206,13 +206,13 @@ namespace core
             ReadDataFromFile(_FilePath, isAsync, (string _data) =>
             {
                 if (_callBackSuccess != null)
-                    _callBackSuccess.Invoke(JsonUtility.FromJson<T>(_data));
+                    _callBackSuccess.Invoke(ParseFromJSON<T>(_data));
             }, _callBackFailure);
         }
 
         public static void WriteJSONToFile<T>(string _FilePath, T _data, bool canOverwrite = true, bool isAsync = false, Action _callBackSuccess = null, Action _callBackFailure = null)
         {
-            string _dataParsed = JsonUtility.ToJson(_data);
+            string _dataParsed = ParseToJSON(_data);
 
             WriteDataToFile(_FilePath, _dataParsed, canOverwrite, isAsync, () =>
             {
@@ -220,6 +220,16 @@ namespace core
                     _callBackSuccess.Invoke();
 
             }, _callBackFailure);
+        }
+
+        public static string ParseToJSON<T>(T _data)
+        {
+            return JsonUtility.ToJson(_data);
+        }
+
+        public static T ParseFromJSON<T>(string _data)
+        {
+            return JsonUtility.FromJson<T>(_data);
         }
 
         // Convert an object to a byte array
