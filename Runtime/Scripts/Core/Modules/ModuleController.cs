@@ -26,7 +26,7 @@ namespace core
         private ModuleConfig ModulesConfiguration = new ModuleConfig();
         private bool isConfigurationLoaded = false;
         public bool isReady = false;
-        private bool useJSONAutoSave = false;
+        private bool useJSONAutoSave = true; // Make this an outside config
         private string MODULECONFIGPATH;
         private string CONFIGFILENAME = "moduleconfig.json";
 
@@ -86,12 +86,9 @@ namespace core
                 }
             }
             else if (useJSONAutoSave)
-            {
                 SaveCurrentConfig();
-                InitAllModules();
-            }
-            else
-                InitAllModules();
+
+            InitAllModules();
 
             isReady = true;
             Debug.Log(">> Modules Loaded! (" + activeModules.Count + ")");
