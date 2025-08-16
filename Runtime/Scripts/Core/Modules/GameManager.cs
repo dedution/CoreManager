@@ -26,12 +26,13 @@ namespace core
         }
 
         private static bool m_GamePaused = false;
-        
+
         private GameManager()
         {
             //Initialize mono dummy gameobject
             coreDummyObject = new GameObject("MonoObject").AddComponent<CoreDummyObject>();
             UnityEngine.Object.DontDestroyOnLoad(coreDummyObject.gameObject);
+            Debug.Log("Initialized Game Manager!");
         }
 
         // Avoid access to the instance
@@ -77,7 +78,7 @@ namespace core
         // Safer way to use logic that interacts with modules without worrying if module even exists
         // Example how to use:
         // ActOnModule((ModuleName _ref) => {_ref.Hello();});
-        public static void ActOnModule<T>(Action<T> _logic, bool forced = false)
+        public static void ActOnModule<T>(Action<T> _logic, bool forced = false, bool required = false)
         {
             if (!Instance.moduleController.isReady && !forced)
             {
@@ -89,6 +90,10 @@ namespace core
 
             if (!ReferenceEquals(_logic, null) && !ReferenceEquals(_module, null))
                 _logic(_module);
+            else if (required)
+            {
+                // Required module is not enabled. Force crash.
+            }
         }
 
         public static bool Game_CanPause()
