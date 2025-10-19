@@ -8,6 +8,7 @@ namespace core.modules
     public class DebugManager : BaseModule
     {
         private bool m_isActive = false;
+        private CursorLockMode previous_cursorLockMode = CursorLockMode.None;
 
         private string currentInputMap = "";
 
@@ -19,6 +20,9 @@ namespace core.modules
             }
             set
             {
+                if (m_isActive == value)
+                    return;
+                    
                 m_isActive = value;
 
                 if (m_isActive)
@@ -28,6 +32,9 @@ namespace core.modules
                         currentInputMap = _ref.GetCurrentMap();
                         _ref.SwitchCurrentMap("UI");
                     }, true);
+
+                    previous_cursorLockMode = Cursor.lockState;
+                    Cursor.lockState = CursorLockMode.None;
                 }
                 else
                 {
@@ -35,6 +42,8 @@ namespace core.modules
                     {
                         _ref.SwitchCurrentMap(currentInputMap);
                     }, true);
+
+                    Cursor.lockState = previous_cursorLockMode;
                 }
             }
         }
