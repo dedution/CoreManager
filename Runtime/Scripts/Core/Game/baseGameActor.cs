@@ -32,9 +32,6 @@ namespace core.gameplay
 
         void Start()
         {
-            // Try to init game manager
-            Init();
-
             // Register Actor
             ActOnModule((ActorManager _ref) => {_ref.RegisterActor(this);});
 

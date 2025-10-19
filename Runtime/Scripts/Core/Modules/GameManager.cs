@@ -47,7 +47,8 @@ namespace core
             }
         }
 
-        // Initialize
+        // Initialize GameManager singleton
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         public static void Init()
         {
             if (!Instance.m_gameManagerWasInit)

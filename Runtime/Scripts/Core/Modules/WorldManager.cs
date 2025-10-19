@@ -291,6 +291,8 @@ namespace core.modules
             // Are they loaded or not?
             // Are they loading?
             // Percentage
+            return;
+            
             if(!LoaderInit)
                 return;
             
