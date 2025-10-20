@@ -76,8 +76,8 @@ namespace core.modules
                 return;
             }
 
-            GameObject instance = UnityEngine.Object.Instantiate(prefab);
-            UnityEngine.Object.DontDestroyOnLoad(instance);
+            GameObject instance = Object.Instantiate(prefab);
+            Object.DontDestroyOnLoad(instance);
         }
 
         private void ToggleDebugMenu(bool state)

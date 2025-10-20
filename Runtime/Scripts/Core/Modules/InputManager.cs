@@ -49,16 +49,25 @@ namespace core.modules
 
         public string GetCurrentScheme()
         {
+            if (m_PlayerInput == null)
+                return "";
+                
             return m_PlayerInput.currentControlScheme;
         }
 
         public bool IsUsingGamepad()
         {
+            if (m_PlayerInput == null)
+                return false;
+                
             return m_PlayerInput.currentControlScheme == "Gamepad";
         }
 
         public void LoadActionAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
         {
+            if (m_PlayerInput == null)
+                return;
+                
             // Set the action asset
             m_PlayerInput.actions = _asset;
             SwitchCurrentMap(_currentActionMap);
@@ -99,29 +108,44 @@ namespace core.modules
 
         public void SwitchCurrentMap(string _map)
         {
+            if (m_PlayerInput == null)
+                return;
+                
             // Set the action asset
             m_PlayerInput.SwitchCurrentActionMap(_map);
         }
 
         public string GetCurrentMap()
         {
+            if (m_PlayerInput == null)
+                return "";
+                
             return m_PlayerInput.currentActionMap.name;
         }
 
         public void RestoreCurrentMap()
         {
+            if (m_PlayerInput == null)
+                return;
+
             SwitchCurrentMap(m_PlayerInput.defaultActionMap);
         }
 
         /* button was pressed or is held */
         public void onActionHold(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return;
+                
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].performed += _logicAction;
         }
 
         public void UnsubscribeToActionHold(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return;
+                
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].performed -= _logicAction;
         }
@@ -129,6 +153,9 @@ namespace core.modules
         /* button was pressed */
         public void onActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return;
+            
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].started += _logicAction;
         }
@@ -136,24 +163,36 @@ namespace core.modules
         /* button was released */
         public void onActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return;
+
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].canceled += _logicAction;
         }
 
         public void UnsubscribeToActionPressed(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return;
+
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].started -= _logicAction;
         }
 
         public void UnsubscribeToActionReleased(string _action, Action<InputAction.CallbackContext> _logicAction, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return;
+                
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].canceled -= _logicAction;
         }
 
         public bool IsActionPressed(string _action, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return false;
+                
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 return m_PlayerInput.actions.FindActionMap(_map)[_action].IsPressed();
             else
@@ -162,6 +201,9 @@ namespace core.modules
 
         public bool IsActionReleased(string _action, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return false;
+
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 return m_PlayerInput.actions.FindActionMap(_map)[_action].WasReleasedThisFrame();
             else
@@ -170,6 +212,9 @@ namespace core.modules
 
         public bool IsActionPressedThisFrame(string _action, string _map = "Player")
         {
+            if (m_PlayerInput == null)
+                return false;
+                
             if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 return m_PlayerInput.actions.FindActionMap(_map)[_action].WasPressedThisFrame();
             else
@@ -179,6 +224,9 @@ namespace core.modules
         // Read direct values from action
         public T ReadActionValue<T>(string _action, bool checkReleased = false, string _map = "Player", T _default = default(T)) where T : struct
         {
+            if (m_PlayerInput == null)
+                return default;
+                
             InputAction _InputAction = m_PlayerInput.actions.FindActionMap(_map)[_action];
 
             if(_InputAction != null && !checkReleased)
@@ -190,6 +238,9 @@ namespace core.modules
         // Here for now
         public void LimitGamepadToFirst()
         {
+            if (m_PlayerInput == null)
+                return;
+
             m_PlayerInput.currentActionMap.devices = new[] { Gamepad.all[0] };
         }
     }

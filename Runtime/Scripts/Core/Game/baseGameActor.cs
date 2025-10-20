@@ -4,12 +4,11 @@ using UnityEngine;
 using core.modules;
 using System;
 using static core.GameManager;
-using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
 namespace core.gameplay
 {
-    [System.Serializable]
+    [Serializable]
     public struct ActorsaveData
     {
         public bool Enabled;
@@ -23,36 +22,56 @@ namespace core.gameplay
         }
     }
 
+
+
     public abstract class baseGameActor : MonoBehaviour
     {
+        struct InputReference
+        {
+            public string action;
+            public InputCallbackType callback_type;
+            public Action<CallbackContext> callback;
+
+            public InputReference(string action, InputCallbackType callback_type, Action<CallbackContext> callback)
+            {
+                this.action = action;
+                this.callback_type = callback_type;
+                this.callback = callback;
+            }
+        }
+
+        enum InputCallbackType
+        {
+            Pressed,
+            Released,
+            Hold
+        }
+
         // Variables
         [Header("Actor Params")]
         public bool actorUpdatesViaManager = false;
 
         [Header("Save System")]
         public ActorsaveData saveDataParameters = new ActorsaveData();
-        
-        // Input helpers 
-        private Dictionary<string, Action<CallbackContext>> _input_pressed_callbacks = new Dictionary<string, Action<CallbackContext>>();
-        private Dictionary<string, Action<CallbackContext>> _input_released_callbacks = new Dictionary<string, Action<CallbackContext>>();
-        private Dictionary<string, Action<CallbackContext>> _input_hold_callbacks = new Dictionary<string, Action<CallbackContext>>();
-        private List<string> _input_map_names = new List<string>();
+
+        // Input helpers
+        private Dictionary<string, List<InputReference>> _input_callbacks = new Dictionary<string, List<InputReference>>();
 
         void Start()
         {
             // Register Actor
-            ActOnModule((ActorManager _ref) => {_ref.RegisterActor(this);});
+            ActOnModule((ActorManager _ref) => { _ref.RegisterActor(this); });
 
             // Initialize actor
             onStart();
         }
 
         protected virtual void onStart()
-        {}
+        { }
 
         // Called via Actor Manager Module
         public virtual void onUpdate()
-        {}
+        { }
 
         protected T SaveSystem_GetData<T>(string _dataKey, T _defaultData)
         {
@@ -74,14 +93,7 @@ namespace core.gameplay
         {
             // Unregister Actor
             ActOnModule((ActorManager _ref) => { _ref.UnregisterActor(this); });
-
-            foreach (string map in _input_map_names)
-            {
-                ClearAllRegisteredActions(map);
-            }
-
-            _input_map_names.Clear();
-            
+            ClearAllRegisteredActions();
             onDestroy();
         }
 
@@ -90,65 +102,78 @@ namespace core.gameplay
         }
 
         #region Helpers 
+
+        private void AddToCallbacks(string action, InputCallbackType callback_type, Action<CallbackContext> _logicAction, string _map = "Player")
+        {
+            InputReference reference = new InputReference(action, callback_type, _logicAction);
+
+            if (!_input_callbacks.ContainsKey(_map))
+            {
+                _input_callbacks.Add(_map, new List<InputReference>());
+            }
+
+            _input_callbacks[_map].Add(reference);
+        }
+
         protected void RegisterActionPressed(string action, Action<CallbackContext> _logicAction, string _map = "Player")
         {
-            RegisterInputMap(_map);
             ActOnModule((InputManager _ref) =>
             {
                 _ref.onActionPressed(action, _logicAction, _map);
-                _input_pressed_callbacks.Add(action, _logicAction);
+                AddToCallbacks(action, InputCallbackType.Pressed, _logicAction, _map);
             });
         }
 
         protected void RegisterActionHold(string action, Action<CallbackContext> _logicAction, string _map = "Player")
         {
-            RegisterInputMap(_map);
             ActOnModule((InputManager _ref) =>
             {
                 _ref.onActionHold(action, _logicAction, _map);
-                _input_released_callbacks.Add(action, _logicAction);
+                AddToCallbacks(action, InputCallbackType.Hold, _logicAction, _map);
             });
         }
 
         protected void RegisterActionReleased(string action, Action<CallbackContext> _logicAction, string _map = "Player")
         {
-            RegisterInputMap(_map);
             ActOnModule((InputManager _ref) =>
             {
                 _ref.onActionReleased(action, _logicAction, _map);
-                _input_released_callbacks.Add(action, _logicAction);
+                AddToCallbacks(action, InputCallbackType.Released, _logicAction, _map);
             });
         }
 
-        protected void ClearAllRegisteredActions(string _map = "Player")
+        protected void ClearAllRegisteredActions()
         {
             ActOnModule((InputManager _ref) =>
             {
-                foreach (string action in _input_pressed_callbacks.Keys)
+                foreach(string map in _input_callbacks.Keys)
                 {
-                    _ref.UnsubscribeToActionPressed(action, _input_released_callbacks[action], _map);
-                }
-                foreach (string action in _input_hold_callbacks.Keys)
-                {
-                    _ref.UnsubscribeToActionHold(action, _input_released_callbacks[action], _map);
-                }
-                foreach (string action in _input_released_callbacks.Keys)
-                {
-                    _ref.UnsubscribeToActionReleased(action, _input_released_callbacks[action], _map);
-                }
+                    foreach (InputReference input_ref in _input_callbacks[map])
+                    {
+                        switch (input_ref.callback_type)
+                        {
+                            case InputCallbackType.Pressed:
+                                {
+                                    _ref.UnsubscribeToActionPressed(input_ref.action, input_ref.callback, map);
+                                    break;
+                                }
+                            case InputCallbackType.Hold:
+                                {
+                                    _ref.UnsubscribeToActionHold(input_ref.action, input_ref.callback, map);
+                                    break;
+                                }
+                            case InputCallbackType.Released:
+                                {
+                                    _ref.UnsubscribeToActionReleased(input_ref.action, input_ref.callback, map);
+                                    break;
+                                }
+                        }
+                    }
 
-                _input_released_callbacks.Clear();
+                }
+                _input_callbacks.Clear();
             });
         }
-
-        protected void RegisterInputMap(string map)
-        {
-            if (!_input_map_names.Contains(map))
-            {
-                _input_map_names.Add(map);
-            }
-        }
-
         #endregion
     }
 }
