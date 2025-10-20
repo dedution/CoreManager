@@ -57,11 +57,7 @@ namespace core.modules
                 {
                     ToggleDebugMenu(true);
                 });
-            }, true);
 
-            // Attach opening menu logic to action map of UI
-            ActOnModule((InputManager _ref) =>
-            {
                 _ref.onActionPressed("Debug", (InputAction.CallbackContext callbackContext) =>
                 {
                     ToggleDebugMenu(false);
