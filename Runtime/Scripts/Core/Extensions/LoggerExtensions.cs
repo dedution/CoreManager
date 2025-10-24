@@ -6,9 +6,10 @@ using static core.GameManager;
 
 public static class Logger
 {
-    public static void Info(string logTag, string output)
+    public static void Info(string logTag, string output, bool onlyConsole = false)
     {
-        Debug.Log(output);
+        if (!onlyConsole)
+            Debug.Log(output);
 
         ActOnModule((EventManager _ref) =>
             {
@@ -16,9 +17,10 @@ public static class Logger
             });
     }
 
-    public static void Warn(string logTag, string output)
+    public static void Warn(string logTag, string output, bool onlyConsole = false)
     {
-        Debug.LogWarning(output);
+        if (!onlyConsole)
+            Debug.LogWarning(output);
 
         ActOnModule((EventManager _ref) =>
             {
@@ -26,9 +28,10 @@ public static class Logger
             });
     }
 
-    public static void Error(string logTag, string output)
+    public static void Error(string logTag, string output, bool onlyConsole = false)
     {
-        Debug.LogError(output);
+        if (!onlyConsole)
+            Debug.LogError(output);
 
         ActOnModule((EventManager _ref) =>
             {

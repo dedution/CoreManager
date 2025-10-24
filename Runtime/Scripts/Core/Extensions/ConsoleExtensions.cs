@@ -76,7 +76,7 @@ namespace core.console
 
             if (tokens.Count == 0 || !console_commands.ContainsKey(tokens[0]))
             {
-                Logger.Error("console", $"Failed to execute command {commandFull}");
+                Logger.Error("console", $"Failed to execute command {commandFull}", true);
                 return;
             }
 
@@ -86,12 +86,12 @@ namespace core.console
 
             if (argDefs.Length != tokens.Count - 1)
             {
-                Logger.Info("console", $"Arguments for command {tokens[0]} don't match");
-                Logger.Info("console", $"Definition:");
-                Logger.Info("console", $"-- Command name: {tokens[0]}");
+                Logger.Info("console", $"Arguments for command {tokens[0]} don't match", true);
+                Logger.Info("console", $"Definition:", true);
+                Logger.Info("console", $"-- Command name: {tokens[0]}", true);
                 foreach (var arg in argDefs)
                 {
-                    Logger.Info("console", $"-- Argument: {arg.name}");
+                    Logger.Info("console", $"-- Argument: {arg.name}", true);
                 }
                 return;
             }
@@ -133,7 +133,7 @@ namespace core.console
                 if (param.ContainsKey("message"))
                 {
                     string msg = (string)param["message"];
-                    Logger.Info("system", msg);
+                    Logger.Info("system", msg, true);
                 }
             }));
         }

@@ -49,10 +49,14 @@ namespace core.debug
 
         public override void onUpdate()
         {
-            if (inputField.isFocused && Input.GetKeyDown(KeyCode.Return))
+            ActOnModule((InputManager _ref) =>
             {
-                HandleSubmit(inputField.text);
-            }
+                if (inputField.isFocused && _ref.IsActionPressed("Submit"))
+                {
+                    HandleSubmit(inputField.text);
+                }
+
+            }, true);
         }
 
         private void HandleTextChanged(string text)

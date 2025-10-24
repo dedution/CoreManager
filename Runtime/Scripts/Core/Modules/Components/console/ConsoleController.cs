@@ -32,7 +32,7 @@ namespace core.debug
         private void OnProcessInput(string input)
         {
             // Print command
-            Logger.Info("system", input);
+            Logger.Info("system", input, true);
 
             // Process and execute it
             Console.ProcessCommand(input);
