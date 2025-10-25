@@ -1,5 +1,4 @@
 {
-    "version": 1,
     "name": "DefaultInputAsset",
     "maps": [
         {
@@ -589,15 +588,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "Debug",
-                    "type": "Button",
-                    "id": "308d7698-db11-4e32-8c47-e4ca4b8d7a9c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1018,14 +1008,51 @@
                     "action": "TrackedDeviceOrientation",
                     "isComposite": false,
                     "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Debug",
+            "id": "d2655aef-c927-4077-86c6-bb67f8a43843",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "0c06cefe-06f5-4e13-aad3-95e39b1ab51c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Debug",
+                    "type": "Button",
+                    "id": "7ece5693-7446-4014-bf87-9d4616715344",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1262ba11-bf1d-4e58-9819-dc143a4cb12a",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "a2e87ee6-9e3c-4195-b8db-e7a1cdc10251",
+                    "id": "0c48372e-2d97-414d-9793-8089529fd15f",
                     "path": "<Keyboard>/backquote",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Keyboard&Mouse",
+                    "groups": "Keyboard&Mouse",
                     "action": "Debug",
                     "isComposite": false,
                     "isPartOfComposite": false

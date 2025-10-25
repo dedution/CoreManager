@@ -30,7 +30,7 @@ namespace core.modules
                     ActOnModule((InputManager _ref) =>
                     {
                         currentInputMap = _ref.GetCurrentMap();
-                        _ref.SwitchCurrentMap("UI");
+                        _ref.SwitchCurrentMap("Debug");
                     }, true);
 
                     previous_cursorLockMode = Cursor.lockState;
@@ -61,7 +61,7 @@ namespace core.modules
                 _ref.onActionPressed("Debug", (InputAction.CallbackContext callbackContext) =>
                 {
                     ToggleDebugMenu(false);
-                }, "UI");
+                }, "Debug");
             }, true);
         }
 
