@@ -13,7 +13,7 @@ namespace core
         private static GameManager _instance = null;
 
         //Persistent behavior that handles unity calls 
-        private CoreDummyObject coreDummyObject;
+        private CoreMonoObject coreMonoObject;
         private ModuleController moduleController = new ModuleController();
         private bool m_gameManagerWasInit = false;
 
@@ -29,9 +29,9 @@ namespace core
 
         private GameManager()
         {
-            //Initialize mono dummy gameobject
-            coreDummyObject = new GameObject("MonoObject").AddComponent<CoreDummyObject>();
-            UnityEngine.Object.DontDestroyOnLoad(coreDummyObject.gameObject);
+            //Initialize mono gameobject
+            coreMonoObject = new GameObject("MonoObject").AddComponent<CoreMonoObject>();
+            UnityEngine.Object.DontDestroyOnLoad(coreMonoObject.gameObject);
             Debug.Log("Initialized Game Manager!");
         }
 
@@ -53,19 +53,19 @@ namespace core
         {
             if (!Instance.m_gameManagerWasInit)
             {
-                Instance.moduleController.Init(Instance.coreDummyObject);
+                Instance.moduleController.Init(Instance.coreMonoObject);
                 Instance.m_gameManagerWasInit = true;
             }
         }
 
         public static Coroutine RunCoroutine(IEnumerator _task)
         {
-            return Instance.coreDummyObject.StartCoroutine(_task);
+            return Instance.coreMonoObject.StartCoroutine(_task);
         }
 
         public static T CreateBehaviorOnDummy<T>() where T : Component
         {
-            var _behavior = Instance.coreDummyObject.gameObject.AddComponent<T>();
+            var _behavior = Instance.coreMonoObject.gameObject.AddComponent<T>();
             return _behavior;
         }
 

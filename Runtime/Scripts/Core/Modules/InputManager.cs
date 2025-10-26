@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine.InputSystem;
+using Codice.Client.BaseCommands;
 
 namespace core.modules
 {
@@ -35,6 +36,14 @@ namespace core.modules
             // Set the action asset
             m_PlayerInput.actions = _asset;
             m_PlayerInput.actions.Enable();
+
+            // Refresh maps otherwise weird behavior may happen on first input
+            foreach (InputActionMap map in m_PlayerInput.actions.actionMaps)
+            {
+                map.Enable();
+                map.Disable();
+            }
+
             SwitchCurrentMap(_currentActionMap);
         }
 

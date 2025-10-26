@@ -4,14 +4,19 @@ using UnityEngine;
 
 namespace core.modules
 {
-    // ONLY LOGIC RELATED TO MODULES HERE
-    // Update gui and normal game ticks
-    public class CoreDummyObject : MonoBehaviour
+    public class CoreMonoObject : MonoBehaviour
     {
         public delegate void ModuleUnityCallDelegate();
         public delegate void ModuleUpdateDelegate(float deltaTime, float unscaledDeltaTime);
         public ModuleUnityCallDelegate unity_GUIDelegate;
         public ModuleUpdateDelegate unity_UpdateDelegate;
+
+        private void Start()
+        {
+            GameObject event_system_prefab = Resources.Load<GameObject>("EventSystem");
+            GameObject event_system = Instantiate(event_system_prefab);
+            event_system.transform.parent = transform;
+        }
 
         private void OnGUI()
         {

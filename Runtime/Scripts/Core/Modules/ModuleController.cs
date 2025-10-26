@@ -69,7 +69,7 @@ namespace core
             isConfigurationLoaded = true;
         }
 
-        public void Init(CoreDummyObject coreDummyObject)
+        public void Init(CoreMonoObject coreMonoObject)
         {
             Debug.Log("Initialized Module Controller!");
 
@@ -89,8 +89,8 @@ namespace core
             foreach (string _typeString in ModulesConfiguration.Modules)
             {
                 var _module = activeModules[Type.GetType(_typeString)];
-                coreDummyObject.unity_GUIDelegate += _module.OnGUI;
-                coreDummyObject.unity_UpdateDelegate += _module.UpdateModule;
+                coreMonoObject.unity_GUIDelegate += _module.OnGUI;
+                coreMonoObject.unity_UpdateDelegate += _module.UpdateModule;
                 _module.onInitialize();
             }
 
