@@ -8,20 +8,8 @@ namespace core.modules
 {
     public class InputManager : BaseModule
     {
-        // TODO
-        // Handle switch between action maps (ex: for player and for UI)
-        // Handle load of json configurations for different platforms
-        // Use a default map inside this package with the default binds\
-        // Handle dynamic reconfiguration and loading over default
-
         private PlayerInput m_PlayerInput;
-        private InputActionAsset m_DefaultActionAsset;
-        private DefaultActionControls _DefaultActions = new DefaultActionControls();
-
-        // Action config by platform
-        // private Dictionary<string, InputActionAsset> m_InputActionConfigs = new Dictionary<string, InputActionAsset>();
-
-        // Load buttons by platform as well
+        private InputActionAsset m_GameActionAsset;
 
         public bool isBusyLoading = true;
 
@@ -29,29 +17,37 @@ namespace core.modules
         {
             m_PlayerInput = GameManager.CreateBehaviorOnDummy<PlayerInput>();
             m_PlayerInput.notificationBehavior = PlayerNotifications.InvokeUnityEvents;
+            m_GameActionAsset = ScriptableObject.CreateInstance<InputActionAsset>();
 
-            // Load default Input
-            m_DefaultActionAsset = _DefaultActions.asset;
-            LoadActionAssetConfiguration(m_DefaultActionAsset);
-            isBusyLoading = false;
+            InputActionAsset default_actions = LoadActionAssetConfiguration("Input/DefaultInputAsset");
+            InputActionAsset game_actions = LoadActionAssetConfiguration("Input/InputAsset");
 
-            // Try to load a default Input from Resources
-            // Dont use async cause of other modules dependencies
-            LoadActionAssetConfiguration("Input/DefaultInputAsset", "Player");
+            m_GameActionAsset = game_actions == null ? default_actions : game_actions;
 
-            // Load overrides?
+            SetAssetConfiguration(m_GameActionAsset);
+        }
+        
+        private void SetAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
+        {
+            if (m_PlayerInput == null)
+                return;
+
+            // Set the action asset
+            m_PlayerInput.actions = _asset;
+            m_PlayerInput.actions.Enable();
+            SwitchCurrentMap(_currentActionMap);
         }
 
         public override void onInitialize()
         {
-            
+
         }
 
         public string GetCurrentScheme()
         {
             if (m_PlayerInput == null)
                 return "";
-                
+
             return m_PlayerInput.currentControlScheme;
         }
 
@@ -59,58 +55,26 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return false;
-                
+
             return m_PlayerInput.currentControlScheme == "Gamepad";
         }
 
-        public void LoadActionAssetConfiguration(InputActionAsset _asset, string _currentActionMap = "Player")
+        public InputActionAsset LoadActionAssetConfiguration(string _asset, string _currentActionMap = "Player", bool useAsync = false)
         {
-            if (m_PlayerInput == null)
-                return;
-                
-            // Set the action asset
-            m_PlayerInput.actions = _asset;
-            SwitchCurrentMap(_currentActionMap);
-        }
+            InputActionAsset _inputdata = Resources.Load<InputActionAsset>(_asset);
 
-        public void LoadActionAssetConfiguration(string _asset, string _currentActionMap = "Player", bool useAsync = false)
-        {
-            isBusyLoading = true;
-
-            // Set the action asset
-            if(useAsync)
-                GameManager.RunCoroutine(LoadActionAsset(_asset, _currentActionMap));
+            if (_inputdata != null)
+                return _inputdata;
             else
-            {
-                InputActionAsset _inputdata = Resources.Load<InputActionAsset>(_asset);
-
-                if(_inputdata != null)
-                    LoadActionAssetConfiguration(_inputdata, _currentActionMap);
-                else
-                    Debug.LogWarning("[RESOURCES] Default Input Asset not found!");
-
-                isBusyLoading = false;
-            }
-        }
-
-        private IEnumerator LoadActionAsset(string _asset, string _currentActionMap = "Player")
-        {
-            ResourceRequest request = Resources.LoadAsync<InputActionAsset>(_asset);
-            yield return request;
-            
-            if(request.asset != null)
-                LoadActionAssetConfiguration(request.asset as InputActionAsset, _currentActionMap);
-            else
-                Debug.LogWarning("[RESOURCES] Default Input Asset not found!");
-
-            isBusyLoading = false;
+                Debug.LogWarning($"[RESOURCES] Input Asset {_asset} not found!");
+            return null;
         }
 
         public void SwitchCurrentMap(string _map)
         {
             if (m_PlayerInput == null)
                 return;
-                
+
             // Set the action asset
             m_PlayerInput.SwitchCurrentActionMap(_map);
         }
@@ -119,7 +83,7 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return "";
-                
+
             return m_PlayerInput.currentActionMap.name;
         }
 
@@ -136,8 +100,8 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return;
-                
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].performed += _logicAction;
         }
 
@@ -145,8 +109,8 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return;
-                
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].performed -= _logicAction;
         }
 
@@ -155,8 +119,8 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return;
-            
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].started += _logicAction;
         }
 
@@ -166,7 +130,7 @@ namespace core.modules
             if (m_PlayerInput == null)
                 return;
 
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].canceled += _logicAction;
         }
 
@@ -175,7 +139,7 @@ namespace core.modules
             if (m_PlayerInput == null)
                 return;
 
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].started -= _logicAction;
         }
 
@@ -183,8 +147,8 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return;
-                
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 m_PlayerInput.actions.FindActionMap(_map)[_action].canceled -= _logicAction;
         }
 
@@ -192,8 +156,8 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return false;
-                
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 return m_PlayerInput.actions.FindActionMap(_map)[_action].IsPressed();
             else
                 return false;
@@ -204,7 +168,7 @@ namespace core.modules
             if (m_PlayerInput == null)
                 return false;
 
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 return m_PlayerInput.actions.FindActionMap(_map)[_action].WasReleasedThisFrame();
             else
                 return false;
@@ -214,8 +178,8 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return false;
-                
-            if(m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
+
+            if (m_PlayerInput.actions.FindActionMap(_map).FindAction(_action) != null)
                 return m_PlayerInput.actions.FindActionMap(_map)[_action].WasPressedThisFrame();
             else
                 return false;
@@ -226,13 +190,13 @@ namespace core.modules
         {
             if (m_PlayerInput == null)
                 return default;
-                
+
             InputAction _InputAction = m_PlayerInput.actions.FindActionMap(_map)[_action];
 
-            if(_InputAction != null && !checkReleased)
+            if (_InputAction != null && !checkReleased)
                 return _InputAction.ReadValue<T>();
             else
-                return ( _InputAction == null || _InputAction.WasReleasedThisFrame()) ? _default : _InputAction.ReadValue<T>();
+                return (_InputAction == null || _InputAction.WasReleasedThisFrame()) ? _default : _InputAction.ReadValue<T>();
         }
 
         // Here for now
