@@ -138,7 +138,7 @@ namespace core.modules
                 yield return null;
                 dataAsJson = Encoding.UTF8.GetString(jsonStream.ToArray());
             }
-            // JSON functions need to be ported over to IOController
+            // JSON functions need to be ported over to IO
             LocaleData _localizationData = JsonUtility.FromJson<LocaleData>(dataAsJson);
 
             foreach (LocalePair loc in _localizationData.localization)

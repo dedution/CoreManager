@@ -19,10 +19,10 @@ public class AutomaticGUID : Editor
     [MenuItem("Save System/Generate All GUIDs", false, 1)]
     private static void GenerateGuid()
     {
-        List<baseGameActor> actors = new List<baseGameActor>(FindObjectsOfType<baseGameActor>());
+        List<GameActor> actors = new List<GameActor>(FindObjectsOfType<GameActor>());
         int dirtyCounter = 0;
 
-        foreach (baseGameActor o in actors)
+        foreach (GameActor o in actors)
         {
             if (!o.saveDataParameters.Enabled)
                 continue;
@@ -45,11 +45,11 @@ public class AutomaticGUID : Editor
     [MenuItem("Save System/Generate GUIDs For Selected", false, 2)]
     private static void GenerateGuidForSelected()
     {
-        List<baseGameActor> actors = new List<baseGameActor>();
+        List<GameActor> actors = new List<GameActor>();
 
         foreach (Transform t in Selection.transforms)
         {
-            baseGameActor actor = t.GetComponent<baseGameActor>();
+            GameActor actor = t.GetComponent<GameActor>();
 
             if (actor)
                 actors.Add(actor);
@@ -57,7 +57,7 @@ public class AutomaticGUID : Editor
 
         int dirtyCounter = 0;
 
-        foreach (baseGameActor o in actors)
+        foreach (GameActor o in actors)
         {
             if (!o.saveDataParameters.Enabled)
                 continue;
@@ -70,7 +70,7 @@ public class AutomaticGUID : Editor
         }
 
         // Find conflicts in all that we can fetch
-        actors = FindObjectsOfType<baseGameActor>().ToList();
+        actors = FindObjectsOfType<GameActor>().ToList();
 
         List<string> conflicts = actors.GroupBy(x => x.saveDataParameters.GUID).Where(group => group.Count() > 1).Select(group => group.Key).ToList();
 
@@ -83,10 +83,10 @@ public class AutomaticGUID : Editor
     [MenuItem("Save System/Clear All GUIDs", false, 3)]
     private static void ClearGuid()
     {
-        List<baseGameActor> actors = new List<baseGameActor>(FindObjectsOfType<baseGameActor>());
+        List<GameActor> actors = new List<GameActor>(FindObjectsOfType<GameActor>());
         int dirtyCounter = 0;
 
-        foreach (baseGameActor o in actors)
+        foreach (GameActor o in actors)
         {
             if (!o.saveDataParameters.Enabled)
                 continue;
@@ -122,7 +122,7 @@ public class AutomaticGUID : Editor
 
             fix = (obj) =>
             {
-                baseGameActor _actor = obj.GetComponent<baseGameActor>();
+                GameActor _actor = obj.GetComponent<GameActor>();
 
                 // If was successful
                 if (_actor)

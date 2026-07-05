@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "DefaultInputAsset",
     "maps": [
         {
@@ -19,7 +20,7 @@
                 {
                     "name": "",
                     "id": "4c650c62-603b-4179-9062-e9b0921e39fd",
-                    "path": "<Keyboard>/f2",
+                    "path": "<Keyboard>/f12",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -47,7 +48,7 @@
                 {
                     "name": "",
                     "id": "0c48372e-2d97-414d-9793-8089529fd15f",
-                    "path": "<Keyboard>/f2",
+                    "path": "<Keyboard>/f12",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",

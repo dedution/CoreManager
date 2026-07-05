@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using static core.GameManager;
-using static core.IOController;
+using static core.IO;
 
 namespace core.modules
 {
@@ -142,12 +142,12 @@ namespace core.modules
         public void SaveSystem_Game_Save()
         {
             // Save data to file
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", true } }); }, true);
+            EventManager.Trigger("SaveSystem", new Dictionary<string, object> { { "isSaving", true } });
             string _Path = GetSavePath();
 
             Debug.Log("Saving data to: " + _Path);
 
-            IOController.WriteDataToFile<GameSaveData>(_Path, gameSaveData, true, true, onSaveDataSuccess);
+            IO.WriteDataToFile<GameSaveData>(_Path, gameSaveData, true, true, onSaveDataSuccess);
         }
 
         /// <summary>
@@ -156,13 +156,13 @@ namespace core.modules
         public void SaveSystem_Game_Load()
         {
             // Load and process data from file
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", true } }); }, true);
+            EventManager.Trigger("SaveSystem", new Dictionary<string, object> { { "isLoading", true } });
 
             string _Path = GetSavePath();
 
             Debug.Log("Loading data from: " + _Path);
 
-            IOController.ReadDataFromFile<GameSaveData>(_Path, true, onLoadDataSuccess);
+            IO.ReadDataFromFile<GameSaveData>(_Path, true, onLoadDataSuccess);
         }
 
         private string GetSavePath()
@@ -178,14 +178,14 @@ namespace core.modules
         private void onSaveDataSuccess()
         {
             Debug.Log("SAVE SUCESSFULL!");
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isSaving", false } }); }, true);
+            EventManager.Trigger("SaveSystem", new Dictionary<string, object> { { "isSaving", false } });
         }
 
         private void onLoadDataSuccess(GameSaveData _data)
         {
             Debug.Log("LOAD SUCESSFULL!");
             gameSaveData = _data;
-            ActOnModule((EventManager _ref) => { _ref.TriggerEvent("SaveSystem", new Dictionary<string, object> { { "isLoading", false } }); }, true);
+            EventManager.Trigger("SaveSystem", new Dictionary<string, object> { { "isLoading", false } });
         }
     }
 }

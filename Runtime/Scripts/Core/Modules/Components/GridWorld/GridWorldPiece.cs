@@ -7,7 +7,7 @@ using static core.GameManager;
 
 namespace Generation.DynamicGrid
 {
-    public class GridWorldPiece : baseGameActor
+    public class GridWorldPiece : GameActor
     {
         private int m_chunkID = 0;
 

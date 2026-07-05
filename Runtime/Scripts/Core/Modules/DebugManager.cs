@@ -22,26 +22,20 @@ namespace core.modules
             {
                 if (m_isActive == value)
                     return;
-                    
+
                 m_isActive = value;
 
                 if (m_isActive)
                 {
-                    ActOnModule((InputManager _ref) =>
-                    {
-                        currentInputMap = _ref.GetCurrentMap();
-                        _ref.SwitchCurrentMap("Debug");
-                    }, true);
+                    currentInputMap = InputManager.GetCurrentMap();
+                    InputManager.SwitchCurrentMap("Debug");
 
                     previous_cursorLockMode = Cursor.lockState;
                     Cursor.lockState = CursorLockMode.None;
                 }
                 else
                 {
-                    ActOnModule((InputManager _ref) =>
-                    {
-                        _ref.SwitchCurrentMap(currentInputMap);
-                    }, true);
+                    InputManager.SwitchCurrentMap(currentInputMap);
 
                     Cursor.lockState = previous_cursorLockMode;
                 }
@@ -51,21 +45,18 @@ namespace core.modules
         public override void onInitialize()
         {
             // Attach opening menu logic to action map of Player
-            ActOnModule((InputManager _ref) =>
-            {
-                _ref.onActionPressed("Debug", (InputAction.CallbackContext callbackContext) =>
+            InputManager.onActionPressed("Debug", (InputAction.CallbackContext callbackContext) =>
                 {
                     ToggleDebugMenu(true);
                 });
 
-                _ref.onActionPressed("Debug", (InputAction.CallbackContext callbackContext) =>
-                {
-                    ToggleDebugMenu(false);
-                }, "Debug");
-            }, true);
+            InputManager.onActionPressed("Debug", (InputAction.CallbackContext callbackContext) =>
+            {
+                ToggleDebugMenu(false);
+            }, "Debug");
         }
 
-        // Load on first scene ready!
+        // Load menu only after the scene loads
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void SpawnMenu()
         {
@@ -83,11 +74,7 @@ namespace core.modules
         private void ToggleDebugMenu(bool state)
         {
             isActive = state;
-
-            ActOnModule((EventManager _ref) =>
-            {
-                _ref.TriggerEvent("Console", new Dictionary<string, object> { { "isMenuOpen", state } });
-            });
+            EventManager.Trigger("Console", new Dictionary<string, object> { { "isMenuOpen", state } });
         }
     }
 }

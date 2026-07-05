@@ -9,15 +9,15 @@ namespace core.modules
 {
     public class ActorManager : BaseModule
     {
-        private baseGameActor m_playerController;
+        private GameActor m_playerController;
 
-        public baseGameActor PlayerController
+        public GameActor PlayerController
         {
             set { m_playerController = value; }
             get { return m_playerController; }
         }
 
-        private Dictionary<Type, List<baseGameActor>> m_registeredActors = new Dictionary<Type, List<baseGameActor>>();
+        private Dictionary<Type, List<GameActor>> m_registeredActors = new Dictionary<Type, List<GameActor>>();
         private delegate void ActorUpdater();
         private ActorUpdater UpdateActors;
 
@@ -30,12 +30,12 @@ namespace core.modules
             
         }
 
-        public void RegisterActor(baseGameActor _actor)
+        public void RegisterActor(GameActor _actor)
         {
             if (!ReferenceEquals(_actor, null))
             {
                 if(!m_registeredActors.ContainsKey(_actor.GetType().BaseType))
-                    m_registeredActors.Add(_actor.GetType().BaseType, new List<baseGameActor>());
+                    m_registeredActors.Add(_actor.GetType().BaseType, new List<GameActor>());
 
                 m_registeredActors[_actor.GetType().BaseType].Add(_actor);
 
@@ -44,7 +44,7 @@ namespace core.modules
             }
         }
 
-        public void UnregisterActor(baseGameActor _actor)
+        public void UnregisterActor(GameActor _actor)
         {
             if (!ReferenceEquals(_actor, null))
             {

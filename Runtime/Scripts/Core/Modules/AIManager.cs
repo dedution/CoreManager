@@ -22,7 +22,7 @@ namespace core.modules
         
         // Timeout when task is waiting some process to finish (in milliseconds)
 
-        private Dictionary<string, Dictionary<string, State<baseCharacterActor>>> AISharedStates = new Dictionary<string, Dictionary<string, State<baseCharacterActor>>>();
+        private Dictionary<string, Dictionary<string, State<CharacterActor>>> AISharedStates = new Dictionary<string, Dictionary<string, State<CharacterActor>>>();
 
         private const int TASKDELAYTIMEOUT = 10;
 
@@ -34,17 +34,17 @@ namespace core.modules
             
         }
 
-        public void RegisterAIStates(baseCharacterActor _actor)
+        public void RegisterAIStates(CharacterActor _actor)
         {
             AISharedStates.Add(_actor.GetType().Name, _actor.m_characterStates);
         }
 
-        public Dictionary<string, State<baseCharacterActor>> GetRegisteredAIStates(baseCharacterActor _actor)
+        public Dictionary<string, State<CharacterActor>> GetRegisteredAIStates(CharacterActor _actor)
         {
             if(AISharedStates.ContainsKey(_actor.GetType().Name))
                 return AISharedStates[_actor.GetType().Name];
             else
-                return new Dictionary<string, State<baseCharacterActor>>();
+                return new Dictionary<string, State<CharacterActor>>();
         }
 
         private async void UpdateNavMeshAgent(NavMeshAgent navMeshAgent, Vector3 _target)

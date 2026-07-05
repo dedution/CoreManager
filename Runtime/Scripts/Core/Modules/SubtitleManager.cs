@@ -20,7 +20,7 @@ namespace core.modules
             // Update SETTINGS_ALLOWSUBTITLES through an event with the correct state
             //Subtitle_Enabled = GetLoadedModule<SaveSystemManager>().SaveSystem_Config_Get("SETTINGS_ALLOWSUBTITLES", false);
 
-            ActOnModule((EventManager _ref) => { _ref.StartListening("SubtitleManager", OnSaveSystem); }, true);
+            EventManager.Connect("SubtitleManager", OnSaveSystem);
         }
 
         void OnSaveSystem(Dictionary<string, object> param)

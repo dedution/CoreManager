@@ -191,7 +191,7 @@ namespace core.modules
             
             // ASYNC WRITE IN NOT TAKING INTO ACCOUNT OVERRIDING
             string _Path = Path.Combine(Application.streamingAssetsPath, "worldconfig.json");
-            IOController.WriteJSONToFile(_Path, worldConfigTest, true, true);
+            IO.WriteJSONToFile(_Path, worldConfigTest, true, true);
         }
 
         private void LoadWorldConfig()
@@ -200,7 +200,7 @@ namespace core.modules
 
             // Only load the config file if it exists
             if(File.Exists(_Path))
-                IOController.ReadJSONFromFile<WorldConfig>(_Path, false, onWorldConfigLoaded);
+                IO.ReadJSONFromFile<WorldConfig>(_Path, false, onWorldConfigLoaded);
         }
 
         private void onWorldConfigLoaded(WorldConfig _data)
