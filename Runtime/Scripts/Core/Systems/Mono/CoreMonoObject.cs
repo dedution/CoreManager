@@ -13,7 +13,13 @@ namespace core.modules
 
         private void Start()
         {
-            GameObject event_system_prefab = Resources.Load<GameObject>("EventSystem");
+            GameObject event_system_prefab = Resources.Load<GameObject>("Scenes/EventSystem");
+            if (event_system_prefab == null)
+            {
+                Debug.LogError("[CoreMonoObject] Prefab not found at Resources/Scenes/EventSystem");
+                return;
+            }
+
             GameObject event_system = Instantiate(event_system_prefab);
             event_system.transform.parent = transform;
         }

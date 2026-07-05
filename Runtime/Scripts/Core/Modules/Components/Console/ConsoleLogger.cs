@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using core;
+using core.console;
 using core.gameplay;
 using core.modules;
 using TMPro;
@@ -34,7 +34,7 @@ namespace core.debug
             // Register events for logging and clearing
             EventManager.Connect("log", OnLogUpdate);
             EventManager.Connect("log_clear", ClearLogs);
-            IntroBanner = LoadIntroText();
+            IntroBanner = Console.IntroText;
         }
 
         void OnLogUpdate(Dictionary<string, object> param)
@@ -175,13 +175,6 @@ namespace core.debug
             logText.text = RainbowText(current.ToString()) + "\n\n";
             Refresh();
             bannerRoutine = null;
-        }
-
-        private static string LoadIntroText()
-        {
-            TextAsset intro = Resources.Load<TextAsset>("UTerm/intro");
-            string text = intro.text;
-            return string.Format(text, "0.6.0");
         }
 
         private static string RainbowText(string text)

@@ -57,7 +57,7 @@ namespace core
             File.WriteAllText(_modulePath, JsonUtility.ToJson(ModulesConfiguration));
             UnityEditor.AssetDatabase.Refresh();
 #else
-            Logger.Warn("Module config can only be saved to Resources while running in the Unity Editor.", GetType().Name);
+            Logger.Warn(GetType().Name, "Module config can only be saved to Resources while running in the Unity Editor.");
 #endif
         }
 
@@ -79,7 +79,7 @@ namespace core
 
         public void Init(CoreMonoObject coreMonoObject)
         {
-            Logger.Info("Initialized Module Controller!", GetType().Name);
+            Logger.Info(GetType().Name, "Initialized Module Controller!");
 
             // Instantiate modules
             foreach (BaseModule _module in InstantiateModules<BaseModule>())
@@ -103,7 +103,7 @@ namespace core
             }
 
             isReady = true;
-            Logger.Info("Modules Loaded! (" + activeModules.Count + ")", GetType().Name);
+            Logger.Info(GetType().Name, "Modules Loaded! (" + activeModules.Count + ")");
         }
 
         public T FindModule<T>()
@@ -113,7 +113,7 @@ namespace core
 
             if (ReferenceEquals(_obj, null))
             {
-                Logger.Error("Couldn't find loaded module: " + _type, GetType().Name);
+                Logger.Error(GetType().Name, "Couldn't find loaded module: " + _type);
                 return default(T);
             }
 

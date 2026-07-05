@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using core;
 using core.console;
@@ -8,8 +7,6 @@ using core.gameplay;
 using core.modules;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static core.GameManager;
 
@@ -19,8 +16,10 @@ namespace core.debug
     public class ConsoleHints : GameActor
     {
         public RectTransform hintsMask;
-        public List<Button> hintButtons;      // Buttons to show suggestions
-        public float buttonHeight = 30f;      // Height of one button
+        public Button hintButtonTemplate;
+        public int visibleSuggestionButtons = 8;
+        public List<Button> hintButtons;
+        public float buttonHeight = 30f;
         public ConsoleInput consoleInput = null;
 
         private bool isVisible = false;
@@ -34,10 +33,13 @@ namespace core.debug
                 consoleInput.OnTextChanged.AddListener(ProcessSuggestions);
             }
 
-            // Add click callbacks to buttons
+            BuildHintButtons();
+            if (hintButtons == null)
+                return;
+
             foreach (var btn in hintButtons)
             {
-                btn.onClick.RemoveAllListeners(); // clear previous listeners
+                btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(() => OnHintButtonClicked(btn));
             }
 
@@ -59,9 +61,11 @@ namespace core.debug
                 return;
             }
 
-            if (input.StartsWith("/"))
+            string activeInput = GetActiveCommandInput(input);
+
+            if (activeInput.StartsWith("/"))
             {
-                string userPrefix = input.Substring(1).ToLower();
+                string userPrefix = activeInput.Substring(1).ToLower();
 
                 foreach (string cmd in allCommands)
                 {
@@ -78,7 +82,7 @@ namespace core.debug
             }
 
             // If input fully matches a command, hide hints
-            if (allCommands.Contains(input))
+            if (allCommands.Contains(activeInput))
             {
                 HideAllButtons();
                 UpdateMasksVisibility(false);
@@ -136,7 +140,7 @@ namespace core.debug
             TextMeshProUGUI txt = btn.GetComponentInChildren<TextMeshProUGUI>();
             if (txt != null)
             {
-                consoleInput.ForceText(txt.text);
+                consoleInput.ForceActiveSegment(txt.text);
             }
 
             HideAllButtons();
@@ -147,6 +151,48 @@ namespace core.debug
         {
             foreach (var btn in hintButtons)
                 btn.gameObject.SetActive(false);
+        }
+
+        private void BuildHintButtons()
+        {
+            if (hintButtons == null)
+                hintButtons = new List<Button>();
+
+            if (hintButtonTemplate == null && hintButtons.Count > 0)
+                hintButtonTemplate = hintButtons[0];
+
+            if (hintButtonTemplate == null)
+                return;
+
+            RectTransform templateRect = hintButtonTemplate.transform as RectTransform;
+            Vector2 startPosition = templateRect != null ? templateRect.anchoredPosition : Vector2.zero;
+            hintButtons.Clear();
+            visibleSuggestionButtons = Mathf.Max(0, visibleSuggestionButtons);
+
+            for (int i = 0; i < visibleSuggestionButtons; i++)
+            {
+                Button btn = i == 0 ? hintButtonTemplate : Instantiate(hintButtonTemplate, hintButtonTemplate.transform.parent);
+                btn.name = i == 0 ? hintButtonTemplate.name : $"{hintButtonTemplate.name} ({i})";
+                RectTransform rect = btn.transform as RectTransform;
+                if (rect != null)
+                    rect.anchoredPosition = new Vector2(startPosition.x, startPosition.y - (buttonHeight * i));
+                btn.gameObject.SetActive(false);
+                hintButtons.Add(btn);
+            }
+
+            for (int i = hintButtonTemplate.transform.parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = hintButtonTemplate.transform.parent.GetChild(i);
+                Button btn = child.GetComponent<Button>();
+                if (btn != null && !hintButtons.Contains(btn))
+                    btn.gameObject.SetActive(false);
+            }
+        }
+
+        private string GetActiveCommandInput(string input)
+        {
+            int start = input.LastIndexOf(';');
+            return (start < 0 ? input : input.Substring(start + 1)).TrimStart();
         }
 
         #region Mask Animation

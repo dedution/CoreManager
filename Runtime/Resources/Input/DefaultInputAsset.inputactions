@@ -42,6 +42,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ConsoleHistoryNext",
+                    "type": "Button",
+                    "id": "7043af92-2b2c-40cf-a396-cf2d4d8ac36d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ConsoleHistoryPrevious",
+                    "type": "Button",
+                    "id": "ff8039a0-3dee-43b1-bb68-9144665d9547",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ConsoleAutoComplete",
+                    "type": "Button",
+                    "id": "b9957bc3-b778-47c7-ac67-0f528f1e3154",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -53,6 +80,39 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Debug",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a3efba26-3bca-41e8-82e5-1ca70865150c",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "ConsoleHistoryNext",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1f7bf4c0-ab5a-42b8-89a2-22a11cd582c0",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "ConsoleHistoryPrevious",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8691c31f-e893-4a5f-ad09-d4bb9c83ca2d",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "ConsoleAutoComplete",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

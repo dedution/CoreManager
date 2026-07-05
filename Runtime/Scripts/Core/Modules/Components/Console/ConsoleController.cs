@@ -32,7 +32,7 @@ namespace core.debug
             Logger.Info("system", input, true);
 
             // Process and execute it
-            StartCoroutine(Console.ProcessCommandRoutine(input));
+            Console.ProcessCommand(input);
         }
 
         private void OnConsoleUpdate(Dictionary<string, object> param)

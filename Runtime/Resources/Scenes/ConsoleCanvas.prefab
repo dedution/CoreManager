@@ -2301,6 +2301,8 @@ MonoBehaviour:
     Enabled: 0
     GUID: 
   hintsMask: {fileID: 1194538247614020469}
+  hintButtonTemplate: {fileID: 3315048816722274458}
+  visibleSuggestionButtons: 8
   hintButtons:
   - {fileID: 3315048816722274458}
   - {fileID: 6880568124723183111}

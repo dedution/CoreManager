@@ -36,7 +36,6 @@ namespace core.modules
                 else
                 {
                     InputManager.SwitchCurrentMap(currentInputMap);
-
                     Cursor.lockState = previous_cursorLockMode;
                 }
             }
@@ -60,10 +59,10 @@ namespace core.modules
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void SpawnMenu()
         {
-            GameObject prefab = Resources.Load<GameObject>("ConsoleCanvas");
+            GameObject prefab = Resources.Load<GameObject>("Scenes/ConsoleCanvas");
             if (prefab == null)
             {
-                Debug.LogError($"[PackageBootstrap] Prefab not found at Resources/ConsoleCanvas");
+                Debug.LogError($"[PackageBootstrap] Prefab not found at Resources/Scenes/ConsoleCanvas");
                 return;
             }
 
