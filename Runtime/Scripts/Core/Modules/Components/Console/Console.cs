@@ -24,7 +24,7 @@ namespace core.console
 
     public static class Console
     {
-        private const string ConfigResourcePath = "console/console_config";
+        private const string ConfigResourcePath = "Console/console_config";
         private static ConsoleConfig Config = new ConsoleConfig();
         private static string ConsoleVersion = "0.0.0";
         private static string ConsoleIntroText = "Welcome to UTerm! {0}";
