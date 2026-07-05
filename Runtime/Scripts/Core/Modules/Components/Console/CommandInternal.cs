@@ -11,120 +11,118 @@ namespace core.console
 {
     public static class CommandInternal
     {
-        private static IConsoleOutput Output => LoggerConsoleOutput.Instance;
-
         public static void Register()
         {
-            Console.RegisterCommand("/version", NoArgs(), param =>
+            ConsoleCommands.RegisterCommand("/version", NoArgs(), (param, context) =>
             {
-                Output.Info("console", $"Console version: {Console.Version}");
+                context.Info("console", $"Console version: {Console.GetVersion()}");
             }, "Prints the console version");
 
-            Console.RegisterCommand("/sleep", Args(("time", typeof(float))), param => Sleep((float)param["time"]), "Sleeps for a given time");
+            ConsoleCommands.RegisterCommand("/sleep", Args(("time", typeof(float))), (param, context) => Sleep((float)param["time"]), "Sleeps for a given time");
 
-            Console.RegisterCommand("/exec", Args(("file_name", typeof(string))), param =>
+            ConsoleCommands.RegisterCommand("/exec", Args(("file_name", typeof(string))), (param, context) =>
             {
                 string content = ReadText((string)param["file_name"]);
                 if (string.IsNullOrEmpty(content))
                 {
-                    Output.Error("console", "File not found or invalid!");
+                    context.Error("console", "File not found or invalid!");
                     return;
                 }
 
-                Console.ProcessCommand(content);
+                ConsoleCommands.ProcessCommand(content, context);
             }, "Executes a file containing commands");
 
-            Console.RegisterCommand("/load-mod", Args(("file_name", typeof(string))), param =>
+            ConsoleCommands.RegisterCommand("/load-mod", Args(("file_name", typeof(string))), (param, context) =>
             {
                 string path = ResolvePath((string)param["file_name"]);
                 if (string.IsNullOrEmpty(path) || !File.Exists(path))
                 {
-                    Output.Warn("AssetBundle", $"Bundle file not found: {path}");
+                    context.Warn("AssetBundle", $"Bundle file not found: {path}");
                     return;
                 }
 
                 AssetBundle bundle = AssetBundle.LoadFromFile(path);
                 if (bundle != null)
-                    Output.Info("AssetBundle", $"Successfully loaded: {path}");
+                    context.Info("AssetBundle", $"Successfully loaded: {path}");
                 else
-                    Output.Error("AssetBundle", $"Failed to load bundle: {path}");
+                    context.Error("AssetBundle", $"Failed to load bundle: {path}");
             }, "Loads an AssetBundle file");
 
-            Console.RegisterCommand("/load-script", Args(("file_name", typeof(string))), param =>
+            ConsoleCommands.RegisterCommand("/load-script", Args(("file_name", typeof(string))), (param, context) =>
             {
-                Output.Warn("console", "/load-script is not available in the Unity port. Register C# commands instead.");
+                context.Warn("console", "/load-script is not available in the Unity port. Register C# commands instead.");
             }, "Reports Unity scripting limitation");
 
-            Console.RegisterCommand("/clear", NoArgs(), param =>
+            ConsoleCommands.RegisterCommand("/clear", NoArgs(), (param, context) =>
             {
-                Output.Clear();
+                context.Clear();
             }, "Clears console logs");
 
-            Console.RegisterCommand("/pause", Args(("pause", typeof(bool))), param =>
+            ConsoleCommands.RegisterCommand("/pause", Args(("pause", typeof(bool))), (param, context) =>
             {
                 bool pause = (bool)param["pause"];
                 Time.timeScale = pause ? 0f : 1f;
                 Time.fixedDeltaTime = 0.02f * Mathf.Max(Time.timeScale, 0.0001f);
-                Output.Info("console", $"Game paused: {pause}");
+                context.Info("console", $"Game paused: {pause}");
             }, "Pauses and unpauses the game");
 
-            Console.RegisterCommand("/game-speed", Args(("time", typeof(float))), param =>
+            ConsoleCommands.RegisterCommand("/game-speed", Args(("time", typeof(float))), (param, context) =>
             {
                 Time.timeScale = (float)param["time"];
                 Time.fixedDeltaTime = 0.02f * Mathf.Max(Time.timeScale, 0.0001f);
-                Output.Info("console", $"Game speed set to: {Time.timeScale.ToString(CultureInfo.InvariantCulture)}");
+                context.Info("console", $"Game speed set to: {Time.timeScale.ToString(CultureInfo.InvariantCulture)}");
             }, "Sets the current game speed");
 
-            Console.RegisterCommand("/fps-cap", Args(("cap", typeof(int))), param =>
+            ConsoleCommands.RegisterCommand("/fps-cap", Args(("cap", typeof(int))), (param, context) =>
             {
                 Application.targetFrameRate = (int)param["cap"];
-                Output.Info("console", $"Game max fps cap set to {Application.targetFrameRate} fps");
+                context.Info("console", $"Game max fps cap set to {Application.targetFrameRate} fps");
             }, "Limits the max game framerate");
 
-            Console.RegisterCommand("/vsync", Args(("state", typeof(bool))), param =>
+            ConsoleCommands.RegisterCommand("/vsync", Args(("state", typeof(bool))), (param, context) =>
             {
                 QualitySettings.vSyncCount = (bool)param["state"] ? 1 : 0;
-                Output.Info("console", $"Game vsync: {QualitySettings.vSyncCount > 0}");
+                context.Info("console", $"Game vsync: {QualitySettings.vSyncCount > 0}");
             }, "Turns vsync on and off");
 
-            Console.RegisterCommand("/monitor-info", NoArgs(), param =>
+            ConsoleCommands.RegisterCommand("/monitor-info", NoArgs(), (param, context) =>
             {
                 for (int i = 0; i < Display.displays.Length; i++)
                 {
                     Display display = Display.displays[i];
-                    Output.Info("console", $"Monitor {i} info:");
-                    Output.Info("console", $"  Resolution: {display.systemWidth}x{display.systemHeight}");
-                    Output.Info("console", "--------------------------------");
+                    context.Info("console", $"Monitor {i} info:");
+                    context.Info("console", $"  Resolution: {display.systemWidth}x{display.systemHeight}");
+                    context.Info("console", "--------------------------------");
                 }
             }, "Prints machine monitor info");
 
-            Console.RegisterCommand("/stats", NoArgs(), param =>
+            ConsoleCommands.RegisterCommand("/stats", NoArgs(), (param, context) =>
             {
                 int fps = Mathf.RoundToInt(1f / Mathf.Max(Time.unscaledDeltaTime, 0.0001f));
-                Output.Info("console", $"Current FPS: {fps}");
-                Output.Info("console", $"Current resolution: {Screen.width}x{Screen.height}");
+                context.Info("console", $"Current FPS: {fps}");
+                context.Info("console", $"Current resolution: {Screen.width}x{Screen.height}");
             }, "Prints game performance related stats");
 
-            Console.RegisterCommand("/net-stats", NoArgs(), param =>
+            ConsoleCommands.RegisterCommand("/net-stats", NoArgs(), (param, context) =>
             {
-                Output.Info("console", $"Machine network address: {LocalIp()}");
+                context.Info("console", $"Machine network address: {LocalIp()}");
             }, "Prints network related stats");
 
-            Console.RegisterCommand("/print", Args(("text", typeof(string))), param =>
+            ConsoleCommands.RegisterCommand("/print", Args(("text", typeof(string))), (param, context) =>
             {
-                Output.Info("console", (string)param["text"]);
+                context.Info("console", (string)param["text"]);
             }, "Prints words into the console");
 
-            Console.RegisterCommand("/help", NoArgs(), param =>
+            ConsoleCommands.RegisterCommand("/help", NoArgs(), (param, context) =>
             {
-                Output.Rainbow("console", "Available commands:");
-                foreach (KeyValuePair<string, Command> pair in Console.GetCommands())
+                context.Rainbow("console", "Available commands:");
+                foreach (KeyValuePair<string, Command> pair in ConsoleCommands.GetCommands())
                 {
                     if (pair.Value.hidden)
                         continue;
 
                     string description = pair.Value.description;
-                    Output.Info("console", string.IsNullOrEmpty(description) ? $"  <i>{pair.Key}</i>" : $"  <i>{pair.Key}</i> - ({description})");
+                    context.Info("console", string.IsNullOrEmpty(description) ? $"  <i>{pair.Key}</i>" : $"  <i>{pair.Key}</i> - ({description})");
                 }
             }, "Lists the available commands");
         }

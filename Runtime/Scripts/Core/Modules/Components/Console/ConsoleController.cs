@@ -8,7 +8,7 @@ using static core.GameManager;
 
 namespace core.debug
 {
-    public class ConsoleController : GameActor
+    public class ConsoleController : GameActor, IConsoleContext
     {
         public ConsoleInput consoleInput = null;
         public ConsoleLogger consoleLogger = null;
@@ -29,10 +29,10 @@ namespace core.debug
         private void OnProcessInput(string input)
         {
             // Print command
-            Logger.Info("system", input, true);
+            Info("system", input);
 
             // Process and execute it
-            Console.ProcessCommand(input);
+            ConsoleCommands.ProcessCommand(input, this);
         }
 
         private void OnConsoleUpdate(Dictionary<string, object> param)
@@ -87,6 +87,31 @@ namespace core.debug
 
             // Snap to final position (avoid precision issues)
             consoleMask.offsetMin = endOffset;
+        }
+
+        public void Info(string tag, string message)
+        {
+            Logger.Info(tag, message, true);
+        }
+
+        public void Warn(string tag, string message)
+        {
+            Logger.Warn(tag, message, true);
+        }
+
+        public void Error(string tag, string message)
+        {
+            Logger.Error(tag, message, true);
+        }
+
+        public void Rainbow(string tag, string message)
+        {
+            Logger.Rainbow(tag, message, true);
+        }
+
+        public void Clear()
+        {
+            Logger.Clear();
         }
     }
 }

@@ -24,11 +24,11 @@ namespace core.console
     {
         public string name;
         public Argument[] arguments;
-        public Action<Dictionary<string, object>> action;
+        public Action<Dictionary<string, object>, IConsoleContext> action;
         public string description;
         public bool hidden;
 
-        public Command(string name, Argument[] arguments, Action<Dictionary<string, object>> action, string description = "", bool hidden = false)
+        public Command(string name, Argument[] arguments, Action<Dictionary<string, object>, IConsoleContext> action, string description = "", bool hidden = false)
         {
             this.name = name;
             this.arguments = arguments;
@@ -44,7 +44,7 @@ namespace core.console
         private static readonly Dictionary<string, Command> console_commands = new Dictionary<string, Command>(StringComparer.Ordinal);
         private static readonly Regex TokenRegex = new Regex("\"([^\"]+)\"|\\S+", RegexOptions.Compiled);
 
-        public static void RegisterCommand(string command, Argument[] arguments, Action<Dictionary<string, object>> action, string description = "", bool hidden = false)
+        public static void RegisterCommand(string command, Argument[] arguments, Action<Dictionary<string, object>, IConsoleContext> action, string description = "", bool hidden = false)
         {
             RegisterCommand(new Command(command, arguments, action, description, hidden));
         }
@@ -80,15 +80,18 @@ namespace core.console
             return console_commands;
         }
 
-        public static void ProcessCommand(string commandFull)
+        public static void ProcessCommand(string commandFull, IConsoleContext context)
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
             foreach (string command in SplitCommands(commandFull))
             {
-                ProcessSingleCommand(command, LoggerConsoleOutput.Instance);
+                ProcessSingleCommand(command, context);
             }
         }
 
-        private static void ProcessSingleCommand(string commandFull, IConsoleOutput output)
+        private static void ProcessSingleCommand(string commandFull, IConsoleContext context)
         {
             if (string.IsNullOrWhiteSpace(commandFull))
                 return;
@@ -96,7 +99,7 @@ namespace core.console
             List<string> tokens = Tokenize(commandFull);
             if (tokens.Count == 0 || !console_commands.TryGetValue(tokens[0], out Command cmd))
             {
-                output.Error("console", $"Failed to execute command <i>{commandFull}</i>");
+                context.Error("console", $"Failed to execute command <i>{commandFull}</i>");
                 return;
             }
 
@@ -105,11 +108,11 @@ namespace core.console
 
             if (argDefs.Length != tokens.Count - 1)
             {
-                output.Error("console", $"Arguments for command <i>{tokens[0]}</i> don't match");
-                output.Info("console", "Expected:");
+                context.Error("console", $"Arguments for command <i>{tokens[0]}</i> don't match");
+                context.Info("console", "Expected:");
                 foreach (Argument arg in argDefs)
                 {
-                    output.Info("console", $"  <i>{arg.name}</i> ({TypeToString(arg.type)})");
+                    context.Info("console", $"  <i>{arg.name}</i> ({TypeToString(arg.type)})");
                 }
                 return;
             }
@@ -119,7 +122,7 @@ namespace core.console
                 Argument argDef = argDefs[i];
                 if (!TryParse(tokens[i + 1], argDef.type, out object value))
                 {
-                    output.Error("console", $"Argument '{argDef.name}' has invalid type. Expected {TypeToString(argDef.type)}");
+                    context.Error("console", $"Argument '{argDef.name}' has invalid type. Expected {TypeToString(argDef.type)}");
                     return;
                 }
 
@@ -128,11 +131,11 @@ namespace core.console
 
             try
             {
-                cmd.action?.Invoke(parsedArgs);
+                cmd.action?.Invoke(parsedArgs, context);
             }
             catch (Exception e)
             {
-                output.Error("console", $"Error executing command {tokens[0]}: {e.Message}");
+                context.Error("console", $"Error executing command {tokens[0]}: {e.Message}");
             }
         }
 

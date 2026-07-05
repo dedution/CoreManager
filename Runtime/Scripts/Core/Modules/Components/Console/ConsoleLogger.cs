@@ -20,7 +20,7 @@ namespace core.debug
         private bool _bootedWithLines = false;
         private bool _menuIsOpen = false;
         private Coroutine bannerRoutine;
-        private string IntroBanner = "Welcome to UTerm!";
+        // private string IntroBanner = "Welcome to UTerm!";
         private const int BannerCharsPerFrame = 8;
         
 
@@ -34,7 +34,7 @@ namespace core.debug
             // Register events for logging and clearing
             EventManager.Connect("log", OnLogUpdate);
             EventManager.Connect("log_clear", ClearLogs);
-            IntroBanner = Console.IntroText;
+            // IntroBanner = Console.IntroText;
         }
 
         void OnLogUpdate(Dictionary<string, object> param)
@@ -152,7 +152,7 @@ namespace core.debug
             if (logText == null)
                 yield break;
 
-            string intro = IntroBanner;
+            string intro = Console.GetIntroBanner();
             logText.text = "";
             _bootedWithLines = false;
 

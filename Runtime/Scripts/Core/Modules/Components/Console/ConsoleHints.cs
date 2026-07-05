@@ -51,7 +51,7 @@ namespace core.debug
             if (hintButtons == null || hintButtons.Count == 0)
                 return;
 
-            List<string> allCommands = Console.GetAllCommands();
+            List<string> allCommands = ConsoleCommands.GetAllCommands();
             List<string> matches = new List<string>();
 
             if (string.IsNullOrEmpty(input))

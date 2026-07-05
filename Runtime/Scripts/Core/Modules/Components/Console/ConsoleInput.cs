@@ -155,7 +155,7 @@ namespace core.debug
             string lower = trimmed.ToLowerInvariant();
             List<string> matches = new List<string>();
 
-            foreach (string command in Console.GetAllCommands())
+            foreach (string command in ConsoleCommands.GetAllCommands())
             {
                 string commandLower = command.ToLowerInvariant();
                 string commandNameLower = commandLower.StartsWith("/") ? commandLower.Substring(1) : commandLower;
