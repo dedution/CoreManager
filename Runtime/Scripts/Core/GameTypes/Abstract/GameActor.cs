@@ -5,6 +5,7 @@ using core.modules;
 using System;
 using static core.GameManager;
 using static UnityEngine.InputSystem.InputAction;
+using core.console;
 
 namespace core.gameplay
 {
@@ -101,7 +102,12 @@ namespace core.gameplay
         {
         }
 
-        #region Helpers 
+        #region Helpers
+
+        protected static Argument[] NoArgs()
+        {
+            return new Argument[] { };
+        }
 
         private void AddToCallbacks(string action, InputCallbackType callback_type, Action<CallbackContext> _logicAction, string _map = "Player")
         {

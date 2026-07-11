@@ -50,11 +50,15 @@ namespace core.modules
             }
         }
 
-        public static void Trigger(string eventName, Dictionary<string, object> message)
+        public static void Trigger(string eventName, Dictionary<string, object> message = null)
         {
             Action<Dictionary<string, object>> thisEvent = null;
+
             if (eventDictionary.TryGetValue(eventName, out thisEvent))
             {
+                if (message == null)
+                    message = new Dictionary<string, object>();
+                
                 thisEvent.Invoke(message);
             }
         }

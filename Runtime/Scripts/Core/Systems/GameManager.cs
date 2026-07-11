@@ -5,17 +5,16 @@ using System;
 using System.Linq;
 using core.modules;
 using core.gameplay;
+using core.utils;
+using UnityEngine.Diagnostics;
 
 namespace core
 {
-    public class GameManager
+    public static class GameManager
     {
-        private static GameManager _instance = null;
-
         // Persistent behavior that handles unity calls 
-        private CoreMonoObject coreMonoObject;
-        private ModuleManager ModuleManager = new ModuleManager();
-        private bool m_gameManagerWasInit = false;
+        private static CoreMonoObject coreMonoObject;
+        private static ModuleManager ModuleManager = new ModuleManager();
 
         // Player stays on the side
         private static GameActor _playerReference;
@@ -29,54 +28,50 @@ namespace core
 
         private static bool m_GamePaused = false;
 
-        private GameManager()
+        // Initialize GameManager singleton
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        private static void Init()
         {
-            //Initialize mono gameobject
             coreMonoObject = new GameObject("MonoObject").AddComponent<CoreMonoObject>();
             UnityEngine.Object.DontDestroyOnLoad(coreMonoObject.gameObject);
             Debug.Log("Initialized Game Manager!");
+            
+            InputManager.Init();
+            ModuleManager.Init(coreMonoObject);
+            RegisterEvents();
         }
 
-        // Avoid access to the instance
-        private static GameManager Instance
+        public static void SetGamePause(bool pause_state)
         {
-            get
-            {
-                if (_instance == null)
-                    _instance = new GameManager();
-
-                return _instance;
-            }
+            m_GamePaused = pause_state;
+            GameUtils.SetGameSpeed(pause_state ? 0f : 1f);
+            EventManager.Trigger("GamePause", new Dictionary<string, object>{ {"current_state", m_GamePaused} });
         }
 
-        // Initialize GameManager singleton
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
-        public static void Init()
+        public static bool GetGamePause()
         {
-            if (!Instance.m_gameManagerWasInit)
-            {
-                InputManager.Init();
-                Instance.ModuleManager.Init(Instance.coreMonoObject);
-                Instance.m_gameManagerWasInit = true;
-            }
+            return m_GamePaused;
         }
 
+        private static void RegisterEvents()
+        {
+        }
+
+        // TODO: DEPRECATE THIS?
         public static Coroutine RunCoroutine(IEnumerator _task)
         {
-            return Instance.coreMonoObject.StartCoroutine(_task);
+            return coreMonoObject.StartCoroutine(_task);
+        }
+
+        public static void StopCoroutine(Coroutine _task)
+        {
+            coreMonoObject.StopCoroutine(_task);
         }
 
         public static T CreateBehaviorOnDummy<T>() where T : Component
         {
-            var _behavior = Instance.coreMonoObject.gameObject.AddComponent<T>();
+            var _behavior = coreMonoObject.gameObject.AddComponent<T>();
             return _behavior;
-        }
-
-        // Easier direct access to module reference
-        private static T GetLoadedModule<T>()
-        {
-            var _obj = Instance.ModuleManager.FindModule<T>();
-            return (T)_obj;
         }
 
         // Safer way to use logic that interacts with modules without worrying if module even exists
@@ -84,9 +79,9 @@ namespace core
         // ActOnModule((ModuleName _ref) => {_ref.Hello();});
         public static void ActOnModule<T>(Action<T> _logic, bool forced = false, bool required = false)
         {
-            if (!Instance.ModuleManager.isReady && !forced)
+            if (!ModuleManager.isReady && !forced)
             {
-                Debug.LogError("Module System [" + typeof(T).Name + "] is not yet initialized but something is trying to access it!");
+                Logger.Error("GameManager", $"Module System [{typeof(T).Name}] is not yet initialized but something is trying to access it!");
                 return;
             }
 
@@ -95,42 +90,15 @@ namespace core
             if (!ReferenceEquals(_logic, null) && !ReferenceEquals(_module, null))
                 _logic(_module);
             else if (required)
-            {
-                // Required module is not enabled. Force crash.
-            }
+                Utils.ForceCrash(ForcedCrashCategory.MonoAbort);
+            else
+                Logger.Error("GameManager", $"Failed to access {typeof(T).Name}");
         }
 
-        public static bool Game_CanPause()
+        private static T GetLoadedModule<T>()
         {
-            return true;
-        }
-        
-        // Returns the state of pause
-        public static void Game_SetPauseState(bool state)
-        {
-            if(m_GamePaused == state || !Game_CanPause())
-                return;
-
-            EventManager.Trigger("gamePause", new Dictionary<string, object> { { "pause", state } });
-            Game_SetGameSpeed(state ? 0f : 1f);
-
-            m_GamePaused = state;
-        }
-
-        public static bool Game_GetPauseState()
-        {
-            return m_GamePaused;
-        }
-        
-        public static void Game_SetGameSpeed(float _targetSpeed)
-        {
-            Time.timeScale = _targetSpeed;
-            Time.fixedDeltaTime = 0.02F * Time.timeScale;
-        }
-
-        public static float Game_GetGameSpeed()
-        {
-            return Time.timeScale;
+            var _obj = ModuleManager.FindModule<T>();
+            return (T)_obj;
         }
     }
 }

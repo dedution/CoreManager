@@ -54,5 +54,55 @@ namespace core.utils
 
             return time;
         }
+
+        public static Coroutine Lerp(Action<float> target, float initial_value, float target_value, float duration = 1.0f, Coroutine previous = null, Action finish_callback = null)
+        {
+            if(previous != null)
+                StopCoroutine(previous);
+
+            return RunCoroutine(LerpCoroutine(target, initial_value, target_value, duration, finish_callback));
+        }
+
+        private static IEnumerator LerpCoroutine(Action<float> target, float initial_value, float target_value, float duration = 1.0f, Action finish_callback = null)
+        {
+            float origin = initial_value;
+            float elapsedTime = 0;
+
+            // Wait until the time has reached the target duration.
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.unscaledDeltaTime;
+                target(Mathf.Lerp(origin, target_value, elapsedTime / duration));
+                yield return null;
+            }
+            
+            target(target_value);
+            finish_callback?.Invoke();
+        }
+
+        public static float FOVConverter(float horizontalFOV, float aspectRatio = 16f / 9f)
+        {
+            // Convert horizontal FOV to radians
+            float horizontalFOVRadians = horizontalFOV * Mathf.Deg2Rad / 2f;
+
+            // Calculate vertical FOV using the formula
+            float verticalFOVRadians = 2f * Mathf.Atan(Mathf.Tan(horizontalFOVRadians) / aspectRatio);
+
+            // Convert back to degrees
+            float verticalFOV = verticalFOVRadians * Mathf.Rad2Deg;
+
+            return verticalFOV;
+        }
+
+        public static void SetGameSpeed(float _targetSpeed)
+        {
+            Time.timeScale = _targetSpeed;
+            Time.fixedDeltaTime = 0.02F * Time.timeScale;
+        }
+
+        public static float GetGameSpeed()
+        {
+            return Time.timeScale;
+        }
     }
 }

@@ -1,10 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System;
-using System.Linq;
 using System.IO;
-using WebSocketSharp;
 
 namespace core.modules
 {
@@ -19,7 +16,7 @@ namespace core.modules
         public string[] audioclips;
     }
 
-    public class AudioManager : BaseModule
+    public static class AudioManager
     {
         // TODO:
         // Loading audio for UI
@@ -27,14 +24,23 @@ namespace core.modules
         // Controller audio support
         // Implement support for audio occlusion
 
-        private List<AudioSource> AudioSourcePool = new List<AudioSource>();
-        private Dictionary<string, AudioClip> LoadedAudioData = new Dictionary<string, AudioClip>();
-        private int AudioSourcePoolID = 0;
-        private GameObject PoolRoot;
+        private static List<AudioSource> AudioSourcePool = new List<AudioSource>();
+        private static Dictionary<string, AudioClip> LoadedAudioData = new Dictionary<string, AudioClip>();
+        private static int AudioSourcePoolID = 0;
+        private static GameObject PoolRoot;
+        private static AudioManagerCoroutineRunner CoroutineRunner;
         private const int POOLSIZE = 30;
 
-        public AudioManager()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        public static void Init()
         {
+            if (PoolRoot != null)
+                UnityEngine.Object.Destroy(PoolRoot);
+
+            AudioSourcePool.Clear();
+            LoadedAudioData.Clear();
+            AudioSourcePoolID = 0;
+
             // Populate pool of audio sources
             PopulatePool();
 
@@ -42,19 +48,14 @@ namespace core.modules
             LoadAudioFromAssets();
         }
 
-        public override void onInitialize()
-        {
-            
-        }
-
-        private void LoadAudioFromAssets()
+        private static void LoadAudioFromAssets()
         {
             // StreamingAssets/Data/Audio.asset -- AssetBundle containing this persistent data
             var audioPackPath = Application.streamingAssetsPath + "/data/audio";
-            GameManager.RunCoroutine(AsyncLoadAudioPack(audioPackPath));
+            CoroutineRunner.StartCoroutine(AsyncLoadAudioPack(audioPackPath));
         }
 
-        IEnumerator AsyncLoadAudioPack(string _path)
+        private static IEnumerator AsyncLoadAudioPack(string _path)
         {
             if(!File.Exists(_path))
             {
@@ -94,16 +95,17 @@ namespace core.modules
 
                 AudioClip _audioClip = assetLoadRequest.asset as AudioClip;
 
-                LoadedAudioData.Add(_clipID, _audioClip);
+                LoadedAudioData[_clipID] = _audioClip;
             }
             
             myLoadedAssetBundle.Unload(false);
         }
 
-        private void PopulatePool()
+        private static void PopulatePool()
         {
             PoolRoot = new GameObject("Audio Source Pool");
             UnityEngine.Object.DontDestroyOnLoad(PoolRoot);
+            CoroutineRunner = PoolRoot.AddComponent<AudioManagerCoroutineRunner>();
 
             for(int i = 0; i < POOLSIZE; i++)
             {
@@ -115,12 +117,12 @@ namespace core.modules
             }
         }
 
-        private void ConfigNewASource(AudioSource _source)
+        private static void ConfigNewASource(AudioSource _source)
         {
             
         }
 
-        private void MoveNextPool()
+        private static void MoveNextPool()
         {
             if(AudioSourcePoolID < POOLSIZE -1)
                 AudioSourcePoolID++;
@@ -128,7 +130,7 @@ namespace core.modules
                 AudioSourcePoolID = 0;
         }
 
-        public void ResetAll()
+        public static void ResetAll()
         {
             for(int i = 0; i < POOLSIZE; i++)
             {
@@ -136,20 +138,20 @@ namespace core.modules
             }
         }
 
-        public void ResetAudio(int IDx)
+        public static void ResetAudio(int IDx)
         {
-            AudioSource _s = AudioSourcePool.ElementAt(IDx);
+            AudioSource _s = AudioSourcePool[IDx];
             _s.Stop();
             ConfigNewASource(_s);
         }
 
-        public void ResetAudio(AudioSource _source)
+        public static void ResetAudio(AudioSource _source)
         {
             _source.Stop();
             ConfigNewASource(_source);
         }
 
-        public AudioSource PlayAudio(AudioClip _clip, Vector3 _audioPosition = new Vector3(), bool _isLoop = false)
+        public static AudioSource PlayAudio(AudioClip _clip, Vector3 _audioPosition = new Vector3(), bool _isLoop = false, bool _is2D = true)
         {
             AudioSource _s = GetNextAudio();
             _s.clip = _clip;
@@ -160,7 +162,7 @@ namespace core.modules
             return _s;
         }
 
-        public AudioSource PlayAudio(string _clipID, Vector3 _audioPosition = new Vector3(), bool _isLoop = false)
+        public static AudioSource PlayAudio(string _clipID, Vector3 _audioPosition = new Vector3(), bool _isLoop = false)
         {
             if(!LoadedAudioData.ContainsKey(_clipID))
                 return null;
@@ -174,11 +176,15 @@ namespace core.modules
             return _s;
         }
 
-        public AudioSource GetNextAudio()
+        public static AudioSource GetNextAudio()
         {
-            AudioSource _s = AudioSourcePool.ElementAt(AudioSourcePoolID);
+            AudioSource _s = AudioSourcePool[AudioSourcePoolID];
             MoveNextPool();
             return _s;
         }
+    }
+
+    internal sealed class AudioManagerCoroutineRunner : MonoBehaviour
+    {
     }
 }
